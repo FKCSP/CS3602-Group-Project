@@ -1,11 +1,11 @@
 # CS3602-Group-Project
 The final project of CS3602(natural language processing---SJTU IEEE Honor Class).
 
-## environment setup
+## Environment Setup
     conda create -n slu python=3.6
     pip install torch==1.7.1
 
-## file explanation
+## File Explanation
 - `utils/args.py`: definitions of all related optional parameters
 - `utils/initialization.py`: Initialize system settings, including setting random seed and GPU/CPU
 - `utils/vocab.py`: Build a vocabulary for encoding input and output
