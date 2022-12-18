@@ -11,6 +11,6 @@ The final project of CS3602(natural language processing---SJTU IEEE Honor Class)
 - `utils/vocab.py`: Build a vocabulary for encoding input and output
 - `utils/word2vec.py`: Load word vector
 - `utils/example.py`: Read data
-- `utils/batch.py`: Load input data as batched
+- `utils/batch.py`: Load input data as batches
 - `model/slu_baseline_tagging.py`: Baseline model
 - `scripts/slu_baseline.py`: Main program script
