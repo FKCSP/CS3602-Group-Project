@@ -3,7 +3,9 @@ The final project of CS3602(natural language processing---SJTU IEEE Honor Class)
 
 ## Environment Setup
     conda create -n slu python=3.6
-    pip install torch==1.7.1
+    pytorch installation
+    - CPU version: pip install torch==1.7.1
+    - GPU version: pip install torch==1.7.1+cu110 -f https://download.pytorch.org/whl/torch_stable.html
 
 ## File Explanation
 - `utils/args.py`: definitions of all related optional parameters
