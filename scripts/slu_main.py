@@ -6,7 +6,7 @@ from torch.optim import Adam
 install_path = os.path.abspath(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(install_path)
 
-from utils.args import init_args
+from utils.args import init_args, parse_method
 from utils.initialization import *
 from utils.example import Example
 from utils.batch import from_example_list
@@ -36,12 +36,12 @@ args.pad_idx = Example.word_vocab[PAD]
 args.num_tags = Example.label_vocab.num_tags
 args.tag_pad_idx = Example.label_vocab.convert_tag_to_idx(PAD)
 
-model = SLUTagging(args).to(device)
+model = parse_method(args, device)
 Example.word2vec.load_embeddings(model.word_embed, Example.word_vocab, device=device)
 
 # log result
 datetime_now = datetime.now().strftime("%Y%m%d-%H%M%S")
-experiment_name = f'baseline.lr_{args.lr}.encoder_cell_{args.encoder_cell}.dropout_{args.dropout}.embed_{args.embed_size}.hidden_{args.hidden_size}.layer_{args.num_layer}.batch_{args.batch_size}.seed_{args.seed}.{datetime_now}'
+experiment_name = f'{args.method}.lr_{args.lr}.encoder_cell_{args.encoder_cell}.dropout_{args.dropout}.embed_{args.embed_size}.hidden_{args.hidden_size}.layer_{args.num_layer}.batch_{args.batch_size}.seed_{args.seed}.{datetime_now}'
 exp_dir = os.path.join('result/', experiment_name)
 os.makedirs(exp_dir, exist_ok=True)
 if args.testing:
@@ -111,7 +111,7 @@ if not args.testing:
         metrics, dev_loss = decode('dev')
         dev_acc, dev_fscore = metrics['acc'], metrics['fscore']
         print('Evaluation: \tEpoch: %d\tTime: %.4f\tDev acc: %.2f\tDev fscore(p/r/f): (%.2f/%.2f/%.2f)' % (i, time.time() - start_time, dev_acc, dev_fscore['precision'], dev_fscore['recall'], dev_fscore['fscore']))
-        if dev_acc > best_result['dev_acc']:
+        if dev_acc >= best_result['dev_acc']:
             best_result['dev_loss'], best_result['dev_acc'], best_result['dev_f1'], best_result['iter'] = dev_loss, dev_acc, dev_fscore, i
             torch.save({
                 'epoch': i, 'model': model.state_dict(),

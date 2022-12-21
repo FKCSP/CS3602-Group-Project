@@ -44,3 +44,10 @@ class Example():
         self.input_idx = [Example.word_vocab[c] for c in self.utt]
         l = Example.label_vocab
         self.tag_id = [l.convert_tag_to_idx(tag) for tag in self.tags]
+        # print('start')
+        # print(self.ex)
+        # print(self.slot)
+        # print(self.tags)
+        # print(self.slotvalue)
+        # print(self.input_idx)
+        # print(self.tag_id)

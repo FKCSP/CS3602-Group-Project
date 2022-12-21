@@ -1,2 +1,4 @@
 # word2vec path
 word2vec-768.txt
+result/
+model.bin
