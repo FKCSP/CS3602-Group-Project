@@ -1,0 +1,66 @@
+[
+    [
+        {
+            "utt_id": 1,
+            "manual_transcript": "导航到和田市公安局",
+            "asr_1best": "导航到和田市公安局",
+            "semantic": [
+                [
+                    "inform",
+                    "终点名称",
+                    "和田市公安局"
+                ],
+                [
+                    "inform",
+                    "操作",
+                    "导航"
+                ]
+            ]
+        }
+    ],
+    [
+        {
+            "utt_id": 1,
+            "manual_transcript": "我要到国际商贸城",
+            "asr_1best": "我要到国际商贸城",
+            "semantic": [
+                [
+                    "inform",
+                    "终点名称",
+                    "国际商贸城"
+                ]
+            ]
+        }
+    ],
+    [
+        {
+            "utt_id": 1,
+            "manual_transcript": "导航去苏立村",
+            "asr_1best": "导航去苏立村",
+            "semantic": [
+                [
+                    "inform",
+                    "操作",
+                    "导航"
+                ],
+                [
+                    "inform",
+                    "终点名称",
+                    "苏立村"
+                ]
+            ]
+        },
+        {
+            "utt_id": 2,
+            "manual_transcript": "(side)苏厉那个厉害的厉啊",
+            "asr_1best": "苏力那个厉害的力啊",
+            "semantic": []
+        },
+        {
+            "utt_id": 3,
+            "manual_transcript": "两个都不是",
+            "asr_1best": "两个都不是",
+            "semantic": []
+        }
+    ]
+]
