@@ -1,4 +1,4 @@
 {
     "terminal.integrated.defaultProfile.windows": "Command Prompt",
-    "python.formatting.autopep8Args": ["--max-line-length", "120", "--experimental"]
+    "python.formatting.autopep8Args": ["--ignore", "E402", "--max-line-length", "120", "--experimental"]
 }
