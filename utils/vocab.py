@@ -1,5 +1,6 @@
-#coding=utf8
-import os, json
+# coding=utf8
+import os
+import json
 PAD = '<pad>'
 UNK = '<unk>'
 BOS = '<s>'
@@ -23,7 +24,7 @@ class Vocab():
             self.from_train(filepath, min_freq=min_freq)
 
     def from_train(self, filepath, min_freq=1):
-        with open(filepath, 'r') as f:
+        with open(filepath, 'r', encoding='utf-8') as f:
             trains = json.load(f)
         word_freq = {}
         for data in trains:
@@ -59,7 +60,7 @@ class LabelVocab():
         self.from_filepath(root)
 
     def from_filepath(self, root):
-        ontology = json.load(open(os.path.join(root, 'ontology.json'), 'r'))
+        ontology = json.load(open(os.path.join(root, 'ontology.json'), 'r', encoding='utf-8'))
         acts = ontology['acts']
         slots = ontology['slots']
 
