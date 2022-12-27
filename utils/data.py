@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Iterator, List, Tuple
+import sys
 
 import torch
 from torch.utils.data import DataLoader, Dataset
@@ -111,6 +112,8 @@ class MyDataset(Dataset):
                 labels[k] = tensor.to(arguments.device)
             self._data.append((features, labels))
         torch.save(self._data, cache_path)
+        print('The cache is written. Please run again.')
+        sys.exit(0)
 
     def get_bio_labels(self, text: List[str], labels: List[Tuple[str, str, str]]) -> List[int]:
         ret = [self.label_converter.label_to_index(Label(BIO.O, '', ''))] * (len(text) + 2)

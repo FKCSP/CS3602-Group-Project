@@ -29,8 +29,8 @@ set_random_seed(arguments.seed)
 label_converter = LabelConverter('data/ontology.json')
 pretrained_model_name = 'bert-base-chinese'
 cache_dir = 'cache'
-train_dataset = MyDataset('data/train_mini.json', label_converter, pretrained_model_name, cache_dir)
-dev_dataset = MyDataset('data/development_mini.json', label_converter, pretrained_model_name, cache_dir)
+train_dataset = MyDataset('data/train.json', label_converter, pretrained_model_name, cache_dir)
+dev_dataset = MyDataset('data/development.json', label_converter, pretrained_model_name, cache_dir)
 train_data_loader = MyDataLoader(train_dataset, batch_size=arguments.batch_size, shuffle=True)
 dev_data_loader = MyDataLoader(dev_dataset)
 encoding_len = train_dataset[0][0][0].vector_with_noise.shape[1]
