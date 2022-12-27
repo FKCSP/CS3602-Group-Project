@@ -1,17 +1,30 @@
 import os
 import sys
 
-from torch.optim import Adam
-
 install_path = os.path.abspath(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(install_path)
 
+import random
+
+import numpy as np
 import torch
 from torch import nn
+from torch.optim import Adam
 
 from model.fnn_decoder import FNNDecoder
 from utils.arguments import arguments
 from utils.data import LabelConverter, MyDataLoader, MyDataset
+
+
+def set_random_seed(random_seed=999):
+    random.seed(random_seed)
+    torch.manual_seed(random_seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(random_seed)
+    np.random.seed(random_seed)
+
+
+set_random_seed(arguments.seed)
 
 label_converter = LabelConverter('data/ontology.json')
 pretrained_model_name = 'bert-base-chinese'

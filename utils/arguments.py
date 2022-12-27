@@ -17,7 +17,7 @@ class Arguments:
     lr: float
     max_epoch: int
     batch_size: int
-
+    seed: int
 
 def init_args(params=sys.argv[1:]) -> Arguments:
     arg_parser = argparse.ArgumentParser()
@@ -32,6 +32,7 @@ def add_argument_base(arg_parser):
     arg_parser.add_argument('--lr', type=float, default=1e-3, help='learning rate')
     arg_parser.add_argument('--max_epoch', type=int, default=100, help='terminate after maximum epochs')
     arg_parser.add_argument('--batch_size', default=32, type=int, help='Batch size')
+    arg_parser.add_argument('--seed', default=114514, type=int, help='Random seed')
     return arg_parser
 
 
