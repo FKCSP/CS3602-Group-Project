@@ -1,6 +1,9 @@
+import hashlib
 import json
+import re
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
 from typing import Iterator, List, Tuple
 
 import torch
@@ -8,8 +11,6 @@ from torch.utils.data import DataLoader, Dataset
 from transformers import BertModel, BertTokenizer
 
 from utils.arguments import arguments
-import json
-import re
 
 
 class BIO(Enum):
@@ -23,6 +24,14 @@ class Label:
     bio: BIO
     act: str
     slot: str
+
+
+@dataclass
+class Sentence:
+    vector_with_noise: torch.Tensor
+    vector_without_noise: torch.Tensor
+    tokens_with_noise: List[str]
+    tokens_without_noise: List[str]
 
 
 class LabelConverter:
@@ -60,9 +69,14 @@ class LabelConverter:
 
 
 class MyDataset(Dataset):
-    pattern = re.compile('\(.*\)')
+    pattern = re.compile(r'\(.*\)')
 
-    def __init__(self, data_path, label_converter: LabelConverter, model_name: str, asr_output: bool) -> None:
+    def __init__(self, data_path, label_converter: LabelConverter, model_name: str, cache_dir):
+        md5 = hashlib.md5((data_path + cache_dir).encode('utf-8')).hexdigest()
+        cache_path = Path(cache_dir) / md5
+        if cache_path.is_file():
+            self._data = torch.load(cache_path, map_location=arguments.device)
+            return
         self.label_converter = label_converter
         tokenizer = BertTokenizer.from_pretrained(model_name)
         model = BertModel.from_pretrained(model_name)
@@ -75,20 +89,28 @@ class MyDataset(Dataset):
             features = [None] * n_utt
             labels = [None] * n_utt
             for j in i:
-                text = j['asr_1best'] if asr_output else j['manual_transcript']
+                text_with_noise = j['asr_1best']
+                text_without_noise = j['manual_transcript']
                 # remove special tokens in the dataset, i.e., (unknown)
-                text = re.sub(self.pattern, '', text)
+                text_with_noise = re.sub(self.pattern, '', text_with_noise)
+                text_without_noise = re.sub(self.pattern, '', text_without_noise)
                 k = j['utt_id'] - 1
-                model_input = tokenizer(text, return_tensors='pt')
+                model_input = tokenizer(text_with_noise, return_tensors='pt')
                 output = model(**model_input)
-                features[k] = output[0][0].to(arguments.device).detach()
-                tokens = tokenizer.tokenize(text)
-                bio_labels = self.get_bio_labels(tokens, j['semantic'])
+                vector_with_noise = output[0][0].to(arguments.device).detach()
+                model_input = tokenizer(text_without_noise, return_tensors='pt')
+                output = model(**model_input)
+                vector_without_noise = output[0][0].to(arguments.device).detach()
+                tokens_with_noise = tokenizer.tokenize(text_with_noise)
+                tokens_without_noise = tokenizer.tokenize(text_without_noise)
+                features[k] = Sentence(vector_with_noise, vector_without_noise, tokens_with_noise, tokens_without_noise)
+                bio_labels = self.get_bio_labels(tokens_without_noise, j['semantic'])
                 tensor = torch.zeros([len(bio_labels), self.label_converter.num_indexes])
                 for i2, v2 in enumerate(bio_labels):
                     tensor[i2, v2] = 1
                 labels[k] = tensor.to(arguments.device)
             self._data.append((features, labels))
+        torch.save(self._data, cache_path)
 
     def get_bio_labels(self, text: List[str], labels: List[Tuple[str, str, str]]) -> List[int]:
         ret = [self.label_converter.label_to_index(Label(BIO.O, '', ''))] * (len(text) + 2)
@@ -100,7 +122,7 @@ class MyDataset(Dataset):
         for i, v in enumerate(text):
             if value.startswith(v):
                 bio = BIO.B if begin else BIO.I
-                ret[i+1] = self.label_converter.label_to_index(Label(bio, act, slot))
+                ret[i + 1] = self.label_converter.label_to_index(Label(bio, act, slot))
                 begin = False
                 value = value[len(v):]
             if len(value) == 0:
@@ -111,9 +133,7 @@ class MyDataset(Dataset):
                 begin = True
         return ret
 
-        
-
-    def __getitem__(self, index: int) -> Tuple[List[torch.Tensor], List[torch.Tensor]]:
+    def __getitem__(self, index: int) -> Tuple[List[Sentence], List[torch.Tensor]]:
         return self._data[index]
 
     def __len__(self) -> int:
@@ -129,6 +149,6 @@ class MyDataLoader(DataLoader):
     def my_collate_func(batch):
         return tuple(zip(*batch))
 
-    def __iter__(self) -> Iterator[Tuple[List[List[torch.Tensor]], List[List[torch.Tensor]]]]:
+    def __iter__(self) -> Iterator[Tuple[List[List[Sentence]], List[List[torch.Tensor]]]]:
         '''Just for type hints.'''
         return super().__iter__()
