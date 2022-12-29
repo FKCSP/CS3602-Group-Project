@@ -1,11 +1,11 @@
 import hashlib
 import json
 import re
+import sys
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Iterator, List, Tuple
-import sys
 
 import torch
 from torch.utils.data import DataLoader, Dataset
@@ -105,7 +105,7 @@ class MyDataset(Dataset):
                 tokens_with_noise = tokenizer.tokenize(text_with_noise)
                 tokens_without_noise = tokenizer.tokenize(text_without_noise)
                 features[k] = Sentence(vector_with_noise, vector_without_noise, tokens_with_noise, tokens_without_noise)
-                bio_labels = self.get_bio_labels(tokens_without_noise, j['semantic'])
+                bio_labels = self._get_bio_labels(tokens_without_noise, j['semantic'])
                 tensor = torch.zeros([len(bio_labels), self.label_converter.num_indexes])
                 for i2, v2 in enumerate(bio_labels):
                     tensor[i2, v2] = 1
@@ -115,7 +115,12 @@ class MyDataset(Dataset):
         print('The cache is written. Please run again.')
         sys.exit(0)
 
-    def get_bio_labels(self, text: List[str], labels: List[Tuple[str, str, str]]) -> List[int]:
+    def _get_bio_labels(self, text: List[str], labels: List[Tuple[str, str, str]]) -> List[int]:
+        labels = [i for i in labels if i[1] != 'values']
+
+        # make labels appear in the same order as they appear in the text
+        labels = self._rearrange_labels(''.join(text), labels)
+
         ret = [self.label_converter.label_to_index(Label(BIO.O, '', ''))] * (len(text) + 2)
         if len(labels) == 0:
             return ret
@@ -134,7 +139,21 @@ class MyDataset(Dataset):
                     break
                 act, slot, value = labels[j]
                 begin = True
+        if j < len(labels):
+            raise RuntimeError('The text and tags are inconsistent.')
         return ret
+
+    @staticmethod
+    def _rearrange_labels(text: str, labels: List[Tuple[str, str, str]]):
+        labels = sorted(labels, key=lambda x: len(x[2]), reverse=True)
+        for i, v in enumerate(labels):
+            j = text.find(v[2])
+            labels[i].append(j)
+            text = text.replace(v[2], '#' * len(v[2]), 1)
+        labels = [i for i in labels if i[3] != -1]
+        labels = sorted(labels, key=lambda x: x[3])
+        labels = [i[:3] for i in labels]
+        return labels
 
     def __getitem__(self, index: int) -> Tuple[List[Sentence], List[torch.Tensor]]:
         return self._data[index]
@@ -145,11 +164,11 @@ class MyDataset(Dataset):
 
 class MyDataLoader(DataLoader):
     def __init__(self, *args, **kwargs):
-        kwargs['collate_fn'] = self.my_collate_func
+        kwargs['collate_fn'] = self._my_collate_func
         super().__init__(*args, **kwargs)
 
     @staticmethod
-    def my_collate_func(batch):
+    def _my_collate_func(batch):
         return tuple(zip(*batch))
 
     def __iter__(self) -> Iterator[Tuple[List[List[Sentence]], List[List[torch.Tensor]]]]:
