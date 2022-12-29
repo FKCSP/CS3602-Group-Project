@@ -13,7 +13,30 @@ from torch.optim import Adam
 
 from model.fnn_decoder import FNNDecoder
 from utils.arguments import arguments
-from utils.data import LabelConverter, MyDataLoader, MyDataset
+from utils.data import LabelConverter, MyDataLoader, MyDataset, Label, BIO
+from typing import List, Tuple
+
+
+def get_output(text: List[str], output: torch.Tensor, label_converter: LabelConverter) -> List[Tuple[str, str, str]]:
+    ret = []
+    output = output[1:-1].argmax(dim=1)
+    labels = [label_converter.index_to_label(i.item()) for i in output]
+    labels.append(Label(BIO.O, '', ''))
+    start = -1
+    act = ''
+    slot = ''
+    for i, v in enumerate(labels):
+        if v.bio == BIO.B:
+            start = i
+            act = v.act
+            slot = v.slot
+        elif v.bio == BIO.O and start != -1:
+            value = ''.join(text[start:i])
+            ret.append([act, slot, value])
+        elif v.bio == BIO.I and (v.act, v.slot) != (act, slot):
+            # invalid tag sequence
+            return []
+    return ret
 
 
 def set_random_seed(random_seed: int) -> None:
@@ -40,27 +63,29 @@ loss_fn = nn.CrossEntropyLoss()
 
 for epoch in range(arguments.max_epoch):
     print('epoch:', epoch)
+    total_loss = 0
     for batch_x, batch_y in train_data_loader:
         optimizer.zero_grad()
         for round_x, round_y in zip(batch_x, batch_y):
             for x, y in zip(round_x, round_y):
                 output = decoder(x.vector_without_noise)
                 loss = loss_fn(output, y)
+                total_loss += loss.item()
                 loss.backward()
         optimizer.step()
+    print('avg. loss:', total_loss / len(train_dataset))
 
     # test
     n_total = 0
     n_correct = 0
-    for batch_x, batch_y in dev_data_loader:
-        with torch.no_grad():
+    with torch.no_grad():
+        for batch_x, batch_y in dev_data_loader:
             for round_x, round_y in zip(batch_x, batch_y):
                 for x, y in zip(round_x, round_y):
                     n_total += 1
-                    output = decoder(x.vector_without_noise)[1:-1]
-                    prediction = output.argmax(dim=1)
-                    expected = y[1:-1].argmax(dim=1)
-                    a = torch.Tensor()
-                    if prediction.equal(expected):
+                    output = decoder(x.vector_with_noise)
+                    prediction = get_output(x.tokens_with_noise, output, label_converter)
+                    expected = get_output(x.tokens_without_noise, y, label_converter)
+                    if prediction == expected:
                         n_correct += 1
     print(n_correct, n_total, n_correct / n_total)
