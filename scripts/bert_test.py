@@ -5,6 +5,7 @@ install_path = os.path.abspath(os.path.dirname(os.path.dirname(os.path.abspath(_
 sys.path.append(install_path)
 
 import random
+from typing import List, Tuple
 
 import numpy as np
 import torch
@@ -13,8 +14,7 @@ from torch.optim import Adam
 
 from model.fnn_decoder import FNNDecoder
 from utils.arguments import arguments
-from utils.data import LabelConverter, MyDataLoader, MyDataset, Label, BIO
-from typing import List, Tuple
+from utils.data import BIO, Label, LabelConverter, MyDataLoader, MyDataset
 
 
 def get_output(text: List[str], output: torch.Tensor, label_converter: LabelConverter) -> List[Tuple[str, str, str]]:
