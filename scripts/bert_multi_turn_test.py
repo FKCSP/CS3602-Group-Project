@@ -12,7 +12,7 @@ import torch
 from torch import nn
 from torch.optim import Adam
 
-from model.decoder import SimpleDecoder
+from model.decoder import MultiTurnDecoder
 from utils.arguments import arguments
 from utils.data import BIO, Label, LabelConverter, MyDataLoader, MyDataset
 
@@ -57,7 +57,7 @@ dev_dataset = MyDataset('data/development.json', label_converter, pretrained_mod
 train_data_loader = MyDataLoader(train_dataset, batch_size=arguments.batch_size, shuffle=True)
 dev_data_loader = MyDataLoader(dev_dataset)
 encoding_len = train_dataset[0][0][0].vector_with_noise.shape[1]
-decoder = SimpleDecoder(encoding_len, label_converter.num_indexes).to(arguments.device)
+decoder = MultiTurnDecoder(encoding_len, label_converter.num_indexes).to(arguments.device)
 optimizer = Adam(decoder.parameters(), arguments.lr)
 loss_fn = nn.CrossEntropyLoss()
 
@@ -66,6 +66,7 @@ for epoch in range(arguments.max_epoch):
     total_loss = 0
     for batch_x, batch_y in train_data_loader:
         optimizer.zero_grad()
+        decoder.reset()
         for round_x, round_y in zip(batch_x, batch_y):
             for x, y in zip(round_x, round_y):
                 output = decoder(x.vector_without_noise)
