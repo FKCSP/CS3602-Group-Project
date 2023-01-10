@@ -16,6 +16,9 @@ from model.decoder import SimpleDecoder
 from utils.arguments import arguments
 from utils.data import BIO, Label, LabelConverter, MyDataLoader, MyDataset
 
+from datetime import datetime
+from utils.logger import Logger
+from utils.initialization import args_print
 
 def get_output(text: List[str], output: torch.Tensor, label_converter: LabelConverter) -> List[Tuple[str, str, str]]:
     ret = []
@@ -62,8 +65,16 @@ decoder = SimpleDecoder(encoding_len, label_converter.num_indexes, arguments).to
 optimizer = Adam(decoder.parameters(), arguments.lr)
 loss_fn = nn.CrossEntropyLoss()
 
+datetime_now = datetime.now().strftime("%Y%m%d-%H%M%S")
+args = arguments
+experiment_name = f'bert.lr_{args.lr}.rnn_{args.rnn}.hidden_{args.hidden_size}.layer_{args.num_layer}.batch_{args.batch_size}.seed_{args.seed}.{datetime_now}'
+exp_dir = os.path.join('result/', experiment_name)
+os.makedirs(exp_dir, exist_ok=True)
+logger = Logger.init_logger(filename=exp_dir + '/train.log')
+args_print(args, logger)
+
 for epoch in range(arguments.max_epoch):
-    print('epoch:', epoch)
+    logger.info(f'Epoch: {epoch}')
     total_loss = 0
     for batch_x, batch_y in train_data_loader:
         optimizer.zero_grad()
@@ -74,7 +85,9 @@ for epoch in range(arguments.max_epoch):
                 total_loss += loss.item()
                 loss.backward()
         optimizer.step()
-    print('avg. loss:', total_loss / len(train_dataset))
+    avgloss = total_loss / len(train_dataset)
+    logger.info(f'avg. loss: {avgloss}')
+    #print('avg. loss:', total_loss / len(train_dataset))
 
     # test
     n_total = 0
@@ -90,3 +103,5 @@ for epoch in range(arguments.max_epoch):
                     if prediction == expected:
                         n_correct += 1
     print(n_correct, n_total, 100*n_correct / n_total)
+    acc = 100*n_correct / n_total
+    logger.info(f'Acc: {acc}')

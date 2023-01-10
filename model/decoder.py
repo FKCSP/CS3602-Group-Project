@@ -5,15 +5,15 @@ from utils.arguments import arguments
 
 
 class SimpleDecoder(nn.Module):
-    def __init__(self, in_len: int, out_len: int, arg, rnn='LSTM'):
+    def __init__(self, in_len: int, out_len: int, args):
         super().__init__()
 
-        hidden_size = 512
+        hidden_size = args.hidden_size
         self.fnn = nn.Sequential(
             nn.Linear(hidden_size, out_len),
             nn.Softmax(dim=1)
         )
-        self.rnn = getattr(nn, rnn)(input_size=in_len, hidden_size=hidden_size // 2, num_layers=arg.num_layer,
+        self.rnn = getattr(nn, args.rnn)(input_size=in_len, hidden_size=hidden_size // 2, num_layers=args.num_layer,
                           batch_first=True, bidirectional=True, dropout=0.1)
 
     def forward(self, x):

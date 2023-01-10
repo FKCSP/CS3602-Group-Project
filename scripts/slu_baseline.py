@@ -16,10 +16,11 @@ from model.slu_baseline_tagging import SLUTagging
 
 # initialization params, output path, logger, random seed and torch.device
 args = init_args(sys.argv[1:])
-set_random_seed(args.seed)
+#set_random_seed(args.seed)
+args.seed = eval(args.seed)
 device = set_torch_device(args.device)
 print("Initialization finished ...")
-print("Random seed is set to %d" % (args.seed))
+# print("Random seed is set to %d" % (args.seed))
 print("Use GPU with index %s" % (args.device) if args.device >= 0 else "Use CPU as target torch device")
 
 start_time = time.time()
@@ -41,7 +42,7 @@ Example.word2vec.load_embeddings(model.word_embed, Example.word_vocab, device=de
 
 # log result
 datetime_now = datetime.now().strftime("%Y%m%d-%H%M%S")
-experiment_name = f'baseline.lr_{args.lr}.encoder_cell_{args.encoder_cell}.dropout_{args.dropout}.embed_{args.embed_size}.hidden_{args.hidden_size}.layer_{args.num_layer}.batch_{args.batch_size}.seed_{args.seed}.{datetime_now}'
+experiment_name = f'baseline.lr_{args.lr}.encoder_cell_{args.encoder_cell}.dropout_{args.dropout}.embed_{args.embed_size}.hidden_{args.hidden_size}.layer_{args.num_layer}.batch_{args.batch_size}.{datetime_now}'
 exp_dir = os.path.join('result/', experiment_name)
 os.makedirs(exp_dir, exist_ok=True)
 if args.testing:
@@ -111,7 +112,8 @@ if not args.testing:
     logger.info('Total training steps: %d' % (num_training_steps))
     all_result = {'acc':[], 'precision':[], 'recall':[], 'fscore':[]}
     for run in range(args.runs):
-        logger.info(f'==================Run {run+1} begins==================')
+        logger.info(f'==================Run {run+1} begins, seed {args.seed[run]}==================')
+        set_random_seed(args.seed[run])
         model.reset_parameters()
 
         optimizer = set_optimizer(model, args)
@@ -160,6 +162,7 @@ if not args.testing:
         torch.tensor(all_result['fscore']).mean(), torch.tensor(all_result['fscore']).std(),
     ))
 else:
+    set_random_seed(args.seed[1])
     start_time = time.time()
     metrics, dev_loss = decode('dev')
     dev_acc, dev_fscore = metrics['acc'], metrics['fscore']
