@@ -5,7 +5,7 @@ from utils.arguments import arguments
 
 
 class SimpleDecoder(nn.Module):
-    def __init__(self, in_len: int, out_len: int):
+    def __init__(self, in_len: int, out_len: int, rnn='GRU'):
         super().__init__()
 
         hidden_size = 512
@@ -13,7 +13,7 @@ class SimpleDecoder(nn.Module):
             nn.Linear(hidden_size, out_len),
             nn.Softmax(dim=1)
         )
-        self.rnn = nn.GRU(input_size=in_len, hidden_size=hidden_size // 2, num_layers=1,
+        self.rnn = getattr(nn, rnn)(input_size=in_len, hidden_size=hidden_size // 2, num_layers=1,
                           batch_first=True, bidirectional=True, dropout=0.1)
 
     def forward(self, x):
@@ -22,7 +22,7 @@ class SimpleDecoder(nn.Module):
 
 
 class MultiTurnDecoder(nn.Module):
-    def __init__(self, in_len: int, out_len: int):
+    def __init__(self, in_len: int, out_len: int, encoder='GRU', cencoder='GRU'):
         super().__init__()
 
         self._memory = []
@@ -31,9 +31,9 @@ class MultiTurnDecoder(nn.Module):
         self._knowledge_len = in_len
         self._memory_len = 256
 
-        self.encoder = nn.GRU(input_size=in_len, hidden_size=self._memory_len // 2, num_layers=1,
+        self.encoder = getattr(nn, encoder)(input_size=in_len, hidden_size=self._memory_len // 2, num_layers=1,
                               batch_first=True, bidirectional=True, dropout=0.1)
-        self.contextual_encoder = nn.GRU(input_size=in_len, hidden_size=self._memory_len // 2, num_layers=1,
+        self.contextual_encoder = getattr(nn, cencoder)(input_size=in_len, hidden_size=self._memory_len // 2, num_layers=1,
                                          batch_first=True, bidirectional=True, dropout=0.1)
         self.knowledge_encoder = nn.Linear(self._memory_len, self._knowledge_len)
         self.decoder = SimpleDecoder(in_len, out_len)
