@@ -1,6 +1,7 @@
 word2vec-768.txt
 result/
 model.bin
+*.bin
 cache
 
 # JetBrains PyCharm IDE

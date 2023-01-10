@@ -58,7 +58,7 @@ dev_dataset = MyDataset('data/development.json', label_converter, pretrained_mod
 train_data_loader = MyDataLoader(train_dataset, batch_size=arguments.batch_size, shuffle=True)
 dev_data_loader = MyDataLoader(dev_dataset)
 encoding_len = train_dataset[0][0][0].vector_with_noise.shape[1]
-decoder = SimpleDecoder(encoding_len, label_converter.num_indexes).to(arguments.device)
+decoder = SimpleDecoder(encoding_len, label_converter.num_indexes, arguments).to(arguments.device)
 optimizer = Adam(decoder.parameters(), arguments.lr)
 loss_fn = nn.CrossEntropyLoss()
 
@@ -89,4 +89,4 @@ for epoch in range(arguments.max_epoch):
                     expected = get_output(x.tokens_without_noise, y, label_converter)
                     if prediction == expected:
                         n_correct += 1
-    print(n_correct, n_total, n_correct / n_total)
+    print(n_correct, n_total, 100*n_correct / n_total)

@@ -5,7 +5,7 @@ from utils.arguments import arguments
 
 
 class SimpleDecoder(nn.Module):
-    def __init__(self, in_len: int, out_len: int, rnn='GRU'):
+    def __init__(self, in_len: int, out_len: int, arg, rnn='LSTM'):
         super().__init__()
 
         hidden_size = 512
@@ -13,7 +13,7 @@ class SimpleDecoder(nn.Module):
             nn.Linear(hidden_size, out_len),
             nn.Softmax(dim=1)
         )
-        self.rnn = getattr(nn, rnn)(input_size=in_len, hidden_size=hidden_size // 2, num_layers=1,
+        self.rnn = getattr(nn, rnn)(input_size=in_len, hidden_size=hidden_size // 2, num_layers=arg.num_layer,
                           batch_first=True, bidirectional=True, dropout=0.1)
 
     def forward(self, x):
@@ -22,7 +22,7 @@ class SimpleDecoder(nn.Module):
 
 
 class MultiTurnDecoder(nn.Module):
-    def __init__(self, in_len: int, out_len: int, encoder='GRU', cencoder='GRU'):
+    def __init__(self, in_len: int, out_len: int, arg, encoder='GRU', cencoder='GRU'):
         super().__init__()
 
         self._memory = []

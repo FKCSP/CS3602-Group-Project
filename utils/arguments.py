@@ -33,6 +33,7 @@ def add_argument_base(arg_parser):
     arg_parser.add_argument('--max_epoch', type=int, default=100, help='terminate after maximum epochs')
     arg_parser.add_argument('--batch_size', default=32, type=int, help='Batch size')
     arg_parser.add_argument('--seed', default=114514, type=int, help='Random seed')
+    arg_parser.add_argument('--num_layer', default=2, type=int, help='number of layer')
     return arg_parser
 
 

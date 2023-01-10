@@ -109,42 +109,56 @@ def predict():
 if not args.testing:
     num_training_steps = ((len(train_dataset) + args.batch_size - 1) // args.batch_size) * args.max_epoch
     logger.info('Total training steps: %d' % (num_training_steps))
-    optimizer = set_optimizer(model, args)
-    nsamples, best_result = len(train_dataset), {'dev_acc': 0., 'dev_f1': 0.}
-    train_index, step_size = np.arange(nsamples), args.batch_size
-    logger.info('Start training ......')
-    for i in range(args.max_epoch):
-        start_time = time.time()
-        epoch_loss = 0
-        np.random.shuffle(train_index)
-        model.train()
-        count = 0
-        for j in range(0, nsamples, step_size):
-            cur_dataset = [train_dataset[k] for k in train_index[j: j + step_size]]
-            current_batch = from_example_list(args, cur_dataset, device, train=True)
-            output, loss = model(current_batch)
-            epoch_loss += loss.item()
-            loss.backward()
-            optimizer.step()
-            optimizer.zero_grad()
-            count += 1
-        print('Training: \tEpoch: %d\tTime: %.4f\tTraining Loss: %.4f' % (i, time.time() - start_time, epoch_loss / count))
-        torch.cuda.empty_cache()
-        gc.collect()
+    all_result = {'acc':[], 'precision':[], 'recall':[], 'fscore':[]}
+    for run in range(args.runs):
+        logger.info(f'==================Run {run+1} begins==================')
+        model.reset_parameters()
 
-        start_time = time.time()
-        metrics, dev_loss = decode('dev')
-        dev_acc, dev_fscore = metrics['acc'], metrics['fscore']
-        print('Evaluation: \tEpoch: %d\tTime: %.4f\tDev acc: %.2f\tDev fscore(p/r/f): (%.2f/%.2f/%.2f)' % (i, time.time() - start_time, dev_acc, dev_fscore['precision'], dev_fscore['recall'], dev_fscore['fscore']))
-        if dev_acc > best_result['dev_acc']:
-            best_result['dev_loss'], best_result['dev_acc'], best_result['dev_f1'], best_result['iter'] = dev_loss, dev_acc, dev_fscore, i
-            torch.save({
-                'epoch': i, 'model': model.state_dict(),
-                'optim': optimizer.state_dict(),
-            }, open('model.bin', 'wb'))
-            logger.info('NEW BEST MODEL: \tEpoch: %d\tDev loss: %.4f\tDev acc: %.2f\tDev fscore(p/r/f): (%.2f/%.2f/%.2f)' % (i, dev_loss, dev_acc, dev_fscore['precision'], dev_fscore['recall'], dev_fscore['fscore']))
+        optimizer = set_optimizer(model, args)
+        nsamples, best_result = len(train_dataset), {'dev_acc': 0., 'dev_f1': 0.}
+        train_index, step_size = np.arange(nsamples), args.batch_size
+        logger.info('Start training ......')
+        for i in range(args.max_epoch):
+            start_time = time.time()
+            epoch_loss = 0
+            np.random.shuffle(train_index)
+            model.train()
+            count = 0
+            for j in range(0, nsamples, step_size):
+                cur_dataset = [train_dataset[k] for k in train_index[j: j + step_size]]
+                current_batch = from_example_list(args, cur_dataset, device, train=True)
+                output, loss = model(current_batch)
+                epoch_loss += loss.item()
+                loss.backward()
+                optimizer.step()
+                optimizer.zero_grad()
+                count += 1
+            print('Training: \tEpoch: %d\tTime: %.4f\tTraining Loss: %.4f' % (i, time.time() - start_time, epoch_loss / count))
+            torch.cuda.empty_cache()
+            gc.collect()
 
-    logger.info('FINAL BEST RESULT: \tEpoch: %d\tDev loss: %.4f\tDev acc: %.4f\tDev fscore(p/r/f): (%.4f/%.4f/%.4f)' % (best_result['iter'], best_result['dev_loss'], best_result['dev_acc'], best_result['dev_f1']['precision'], best_result['dev_f1']['recall'], best_result['dev_f1']['fscore']))
+            start_time = time.time()
+            metrics, dev_loss = decode('dev')
+            dev_acc, dev_fscore = metrics['acc'], metrics['fscore']
+            print('Evaluation: \tEpoch: %d\tTime: %.4f\tDev acc: %.2f\tDev fscore(p/r/f): (%.2f/%.2f/%.2f)' % (i, time.time() - start_time, dev_acc, dev_fscore['precision'], dev_fscore['recall'], dev_fscore['fscore']))
+            if dev_acc > best_result['dev_acc']:
+                best_result['dev_loss'], best_result['dev_acc'], best_result['dev_f1'], best_result['iter'] = dev_loss, dev_acc, dev_fscore, i
+                torch.save({
+                    'epoch': i, 'model': model.state_dict(),
+                    'optim': optimizer.state_dict(),
+                }, open(f'model{run}.bin', 'wb'))
+                logger.info('NEW BEST MODEL: \tEpoch: %d\tDev loss: %.4f\tDev acc: %.2f\tDev fscore(p/r/f): (%.2f/%.2f/%.2f)' % (i, dev_loss, dev_acc, dev_fscore['precision'], dev_fscore['recall'], dev_fscore['fscore']))
+        all_result['acc'].append(best_result['dev_acc'])
+        all_result['precision'].append(best_result['dev_f1']['precision'])
+        all_result['recall'].append(best_result['dev_f1']['recall'])
+        all_result['fscore'].append(best_result['dev_f1']['fscore'])
+        logger.info('FINAL BEST RESULT: \tEpoch: %d\tDev loss: %.4f\tDev acc: %.4f\tDev fscore(p/r/f): (%.4f/%.4f/%.4f)' % (best_result['iter'], best_result['dev_loss'], best_result['dev_acc'], best_result['dev_f1']['precision'], best_result['dev_f1']['recall'], best_result['dev_f1']['fscore']))
+    logger.info("Dev ACC:{:.2f}-+-{:.2f} Precision:{:.2f}-+-{:.2f} Recall:{:.2f}-+-{:.2f} F score:{:.2f}-+-{:.2f}".format(
+        torch.tensor(all_result['acc']).mean(), torch.tensor(all_result['acc']).std(),
+        torch.tensor(all_result['precision']).mean(), torch.tensor(all_result['precision']).std(),
+        torch.tensor(all_result['recall']).mean(), torch.tensor(all_result['recall']).std(),
+        torch.tensor(all_result['fscore']).mean(), torch.tensor(all_result['fscore']).std(),
+    ))
 else:
     start_time = time.time()
     metrics, dev_loss = decode('dev')
