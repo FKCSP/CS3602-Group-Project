@@ -7,7 +7,7 @@ from utils.arguments import arguments
 class SimpleDecoder(nn.Module):
     def __init__(self, in_len: int, out_len: int, args):
         super().__init__()
-
+        print(in_len,out_len)
         hidden_size = args.hidden_size
         self.fnn = nn.Sequential(
             nn.Linear(hidden_size, out_len),

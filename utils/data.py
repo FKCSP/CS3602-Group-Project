@@ -41,8 +41,8 @@ class LabelConverter:
             data = json.load(f)
         self.act_to_index = {v: i for i, v in enumerate(data['acts'])}
         self.index_to_act = {i: v for i, v in enumerate(data['acts'])}
-        self.slot_to_index = {v: i for i, v in enumerate(data['slots']) if v != 'value'}
-        self.index_to_slot = {i: v for i, v in enumerate(data['slots']) if v != 'value'}
+        self.slot_to_index = {v: i for i, v in enumerate(data['slots'])}
+        self.index_to_slot = {i: v for i, v in enumerate(data['slots'])}
         self.n_acts = len(self.act_to_index)
         self.n_slots = len(self.slot_to_index)
 
@@ -116,7 +116,7 @@ class MyDataset(Dataset):
         sys.exit(0)
 
     def _get_bio_labels(self, text: List[str], labels: List[Tuple[str, str, str]]) -> List[int]:
-        labels = [i for i in labels if i[1] != 'values']
+        labels = [i for i in labels]
 
         # make labels appear in the same order as they appear in the text
         labels = self._rearrange_labels(''.join(text), labels)

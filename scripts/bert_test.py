@@ -49,12 +49,17 @@ def set_random_seed(random_seed: int) -> None:
         torch.cuda.manual_seed(random_seed)
     np.random.seed(random_seed)
 
+def set_optimizer(model, lr):
+    params = [(n, p) for n, p in model.named_parameters() if p.requires_grad]
+    grouped_params = [{'params': list(set([p for n, p in params]))}]
+    optimizer = Adam(grouped_params, lr=lr)
+    return optimizer
 
 set_random_seed(arguments.seed)
 
 label_converter = LabelConverter('data/ontology.json')
-#pretrained_model_name = 'bert-base-chinese'
-pretrained_model_name = 'hfl/chinese-bert-wwm-ext'
+pretrained_model_name = 'bert-base-chinese'
+#pretrained_model_name = 'hfl/chinese-bert-wwm-ext'
 cache_dir = 'cache'
 os.makedirs(cache_dir,exist_ok=True)
 train_dataset = MyDataset('data/train.json', label_converter, pretrained_model_name, cache_dir)
@@ -63,7 +68,7 @@ train_data_loader = MyDataLoader(train_dataset, batch_size=arguments.batch_size,
 dev_data_loader = MyDataLoader(dev_dataset)
 encoding_len = train_dataset[0][0][0].vector_with_noise.shape[1]
 decoder = SimpleDecoder(encoding_len, label_converter.num_indexes, arguments).to(arguments.device)
-optimizer = Adam(decoder.parameters(), arguments.lr)
+optimizer = set_optimizer(decoder, arguments.lr)
 loss_fn = nn.CrossEntropyLoss()
 
 datetime_now = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -77,22 +82,24 @@ args_print(args, logger)
 for epoch in range(arguments.max_epoch):
     logger.info(f'Epoch: {epoch}')
     total_loss = 0
+    decoder.train()
     for batch_x, batch_y in train_data_loader:
         optimizer.zero_grad()
         for round_x, round_y in zip(batch_x, batch_y):
             for x, y in zip(round_x, round_y):
-                output = decoder(x.vector_without_noise)
+                output = decoder(x.vector_with_noise)
                 loss = loss_fn(output, y)
                 total_loss += loss.item()
                 loss.backward()
         optimizer.step()
     avgloss = total_loss / len(train_dataset)
-    logger.info(f'avg. loss: {avgloss}')
+    logger.info(f'train. loss: {avgloss}')
     #print('avg. loss:', total_loss / len(train_dataset))
 
     # test
     n_total = 0
     n_correct = 0
+    decoder.eval()
     with torch.no_grad():
         for batch_x, batch_y in dev_data_loader:
             for round_x, round_y in zip(batch_x, batch_y):
@@ -101,8 +108,13 @@ for epoch in range(arguments.max_epoch):
                     output = decoder(x.vector_with_noise)
                     prediction = get_output(x.tokens_with_noise, output, label_converter)
                     expected = get_output(x.tokens_without_noise, y, label_converter)
+                    # print(output.shape, y.shape)
+                    # loss = loss_fn(output, y)
+                    # total_loss += loss.item()
                     if prediction == expected:
                         n_correct += 1
-    print(n_correct, n_total, 100*n_correct / n_total)
+    #test_loss = total_loss / n_total
+    #print(n_correct, n_total, 100*n_correct / n_total)
     acc = 100*n_correct / n_total
-    logger.info(f'Acc: {acc}')
+    #logger.info(f'Test loss: {test_loss} Acc: {acc} correct: {n_correct} total: {n_total}')
+    logger.info(f'Acc: {acc} correct: {n_correct} total: {n_total}')
