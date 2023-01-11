@@ -30,6 +30,7 @@ def add_argument_base(arg_parser):
     arg_parser.add_argument('--device', type=str, default='cuda',
                             help='Use which device: can be "cuda" (dafault) or "cpu"')
     arg_parser.add_argument('--lr', type=float, default=1e-3, help='learning rate')
+    arg_parser.add_argument('--weight_decay', type=float, default=0, help='weight decay')
     arg_parser.add_argument('--max_epoch', type=int, default=200, help='terminate after maximum epochs')
     arg_parser.add_argument('--batch_size', default=32, type=int, help='Batch size')
     arg_parser.add_argument('--seed', default=114514, type=int, help='Random seed')

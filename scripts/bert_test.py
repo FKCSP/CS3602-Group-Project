@@ -68,7 +68,7 @@ train_data_loader = MyDataLoader(train_dataset, batch_size=arguments.batch_size,
 dev_data_loader = MyDataLoader(dev_dataset)
 encoding_len = train_dataset[0][0][0].vector_with_noise.shape[1]
 decoder = SimpleDecoder(encoding_len, label_converter.num_indexes, arguments).to(arguments.device)
-optimizer = set_optimizer(decoder, arguments.lr)
+optimizer = Adam(decoder.parameters(), lr=arguments.lr, weight_decay=arguments.weight_decay)
 loss_fn = nn.CrossEntropyLoss()
 
 datetime_now = datetime.now().strftime("%Y%m%d-%H%M%S")
