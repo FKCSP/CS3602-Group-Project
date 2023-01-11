@@ -73,7 +73,7 @@ class MyDataset(Dataset):
     pattern = re.compile(r'\(.*\)')
 
     def __init__(self, data_path, label_converter: LabelConverter, model_name: str, cache_dir):
-        md5 = hashlib.md5((data_path + cache_dir).encode('utf-8')).hexdigest()
+        md5 = hashlib.md5((model_name + data_path + cache_dir).encode('utf-8')).hexdigest()
         cache_path = Path(cache_dir) / md5
         if cache_path.is_file():
             self._data = torch.load(cache_path, map_location=arguments.device)

@@ -53,7 +53,8 @@ def set_random_seed(random_seed: int) -> None:
 set_random_seed(arguments.seed)
 
 label_converter = LabelConverter('data/ontology.json')
-pretrained_model_name = 'bert-base-chinese'
+#pretrained_model_name = 'bert-base-chinese'
+pretrained_model_name = 'hfl/chinese-bert-wwm-ext'
 cache_dir = 'cache'
 os.makedirs(cache_dir,exist_ok=True)
 train_dataset = MyDataset('data/train.json', label_converter, pretrained_model_name, cache_dir)
