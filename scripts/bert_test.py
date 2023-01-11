@@ -49,12 +49,6 @@ def set_random_seed(random_seed: int) -> None:
         torch.cuda.manual_seed(random_seed)
     np.random.seed(random_seed)
 
-def set_optimizer(model, lr):
-    params = [(n, p) for n, p in model.named_parameters() if p.requires_grad]
-    grouped_params = [{'params': list(set([p for n, p in params]))}]
-    optimizer = Adam(grouped_params, lr=lr)
-    return optimizer
-
 set_random_seed(arguments.seed)
 
 label_converter = LabelConverter('data/ontology.json')
@@ -87,7 +81,7 @@ for epoch in range(arguments.max_epoch):
         optimizer.zero_grad()
         for round_x, round_y in zip(batch_x, batch_y):
             for x, y in zip(round_x, round_y):
-                output = decoder(x.vector_with_noise)
+                output = decoder(x.vector_without_noise)
                 loss = loss_fn(output, y)
                 total_loss += loss.item()
                 loss.backward()
