@@ -18,7 +18,7 @@ def add_argument_base(arg_parser):
     arg_parser.add_argument('--device', type=int, default=7, help='Use which device: -1 -> cpu ; the index of gpu o.w.')
     arg_parser.add_argument('--testing', action='store_true', help='training or evaluation mode')
     #### Training Hyperparams ####
-    arg_parser.add_argument('--batch_size', default=32, type=int, help='Batch size')
+    arg_parser.add_argument('--batch_size', default=16, type=int, help='Batch size')
     arg_parser.add_argument('--lr', type=float, default=1e-3, help='learning rate')
     arg_parser.add_argument('--max_epoch', type=int, default=100, help='terminate after maximum epochs')
     #### Common Encoder Hyperparams ####

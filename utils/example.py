@@ -55,8 +55,8 @@ class conversation():
         if self.utt:
             self.utt += ';'
             self.input_idx.append(2)
-            self.tag_id.append("O")
-        self.utt.append(ex.utt)
+            self.tag_id.append(1)
+        self.utt += ex.utt
         self.input_idx += ex.input_idx
         self.tag_id += ex.tag_id
         self.ex_lst.append(ex)

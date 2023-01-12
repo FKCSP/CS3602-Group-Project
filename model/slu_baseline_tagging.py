@@ -32,7 +32,8 @@ class SLUTagging(nn.Module):
 
     def decode(self, label_vocab, batch):
         batch_size = len(batch)
-        labels = batch.labels
+        # labels = batch.labels
+        labels = [[ex.slotvalue for ex in conv.ex_lst] for conv in batch.examples]
         output = self.forward(batch)
         prob = output[0]
         predictions = []
