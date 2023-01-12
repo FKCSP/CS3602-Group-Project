@@ -1,7 +1,7 @@
 #coding=utf8
 
 import numpy as np
-from utils.vocab import PAD, UNK
+from SLUBase.dataset.vocab import PAD, UNK
 import torch
 
 class Word2vecUtils():

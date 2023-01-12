@@ -1,8 +1,8 @@
 #coding=utf-8
 import argparse
 import sys
-from model.slu_baseline_tagging import SLUTagging
-from model.slu_transformer_tagging import TagTransformer
+from SLUBase.model.slu_baseline_tagging import SLUTagging
+from SLUBase.model.slu_transformer_tagging import TagTransformer
 
 
 def init_args(params=sys.argv[1:]):

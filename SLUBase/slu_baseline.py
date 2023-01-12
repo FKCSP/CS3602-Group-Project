@@ -6,13 +6,13 @@ from torch.optim import Adam
 install_path = os.path.abspath(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(install_path)
 
-from utils.args import init_args
-from utils.initialization import *
-from utils.example import Example
-from utils.batch import from_example_list
-from utils.vocab import PAD
-from utils.logger import Logger
-from model.slu_baseline_tagging import SLUTagging
+from SLUBase.utils.args import init_args
+from SLUBase.utils.initialization import *
+from SLUBase.dataset.example import Example
+from SLUBase.dataset.batch import from_example_list
+from SLUBase.dataset.vocab import PAD
+from SLUBase.utils.logger import Logger
+from SLUBase.model.slu_baseline_tagging import SLUTagging
 
 # initialization params, output path, logger, random seed and torch.device
 args = init_args(sys.argv[1:])

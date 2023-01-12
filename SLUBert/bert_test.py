@@ -14,7 +14,7 @@ from torch.optim import Adam
 
 from model.decoder import SimpleDecoder
 from utils.arguments import arguments
-from utils.data import BIO, Label, LabelConverter, MyDataLoader, MyDataset
+from dataset.data import BIO, Label, LabelConverter, MyDataLoader, MyDataset
 
 from datetime import datetime
 from utils.logger import Logger
@@ -57,7 +57,7 @@ label_converter = LabelConverter('data/ontology.json')
 pretrained_model_name = 'bert-base-chinese'
 
 # make directory
-cache_dir = 'cache'
+cache_dir = './SLUBert/cache'
 os.makedirs(cache_dir, exist_ok=True)
 
 # prepare dataset & dataloader
@@ -88,14 +88,16 @@ for epoch in range(arguments.max_epoch):
     # training
     decoder.train()
     for batch_x, batch_y in train_data_loader:
+        batch_loss = 0
         for round_x, round_y in zip(batch_x, batch_y):
             for x, y in zip(round_x, round_y):
                 output = decoder(x.vector_without_noise)
                 loss = loss_fn(output, y)
                 total_loss += loss
-    optimizer.zero_grad()
-    total_loss.backward()
-    optimizer.step()
+                batch_loss += loss
+        optimizer.zero_grad()
+        batch_loss.backward()
+        optimizer.step()
     avgloss = total_loss.item() / len(train_dataset)
     logger.info(f'train. loss: {avgloss}')
 

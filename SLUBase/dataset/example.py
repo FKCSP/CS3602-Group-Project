@@ -1,8 +1,8 @@
 import json
 
-from utils.vocab import Vocab, LabelVocab
-from utils.word2vec import Word2vecUtils
-from utils.evaluator import Evaluator
+from SLUBase.dataset.vocab import Vocab, LabelVocab
+from SLUBase.dataset.word2vec import Word2vecUtils
+from SLUBase.utils.evaluator import Evaluator
 
 class Example():
 
