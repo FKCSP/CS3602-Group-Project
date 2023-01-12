@@ -55,22 +55,30 @@ def set_optimizer(model, lr):
     optimizer = Adam(grouped_params, lr=lr)
     return optimizer
 
+# set random seed
 set_random_seed(arguments.seed)
 
+# label converter
 label_converter = LabelConverter('data/ontology.json')
 pretrained_model_name = 'bert-base-chinese'
-#pretrained_model_name = 'hfl/chinese-bert-wwm-ext'
+
+# make directory
 cache_dir = 'cache'
-os.makedirs(cache_dir,exist_ok=True)
+os.makedirs(cache_dir, exist_ok=True)
+
+# prepare dataset & dataloader
 train_dataset = MyDataset('data/train.json', label_converter, pretrained_model_name, cache_dir)
 dev_dataset = MyDataset('data/development.json', label_converter, pretrained_model_name, cache_dir)
 train_data_loader = MyDataLoader(train_dataset, batch_size=arguments.batch_size, shuffle=True)
 dev_data_loader = MyDataLoader(dev_dataset)
 encoding_len = train_dataset[0][0][0].vector_with_noise.shape[1]
+
+# model configuration
 decoder = SimpleDecoder(encoding_len, label_converter.num_indexes, arguments).to(arguments.device)
 optimizer = Adam(decoder.parameters(), lr=arguments.lr, weight_decay=arguments.weight_decay)
 loss_fn = nn.CrossEntropyLoss()
 
+# logger information
 datetime_now = datetime.now().strftime("%Y%m%d-%H%M%S")
 args = arguments
 experiment_name = f'bert.lr_{args.lr}.rnn_{args.rnn}.hidden_{args.hidden_size}.layer_{args.num_layer}.batch_{args.batch_size}.seed_{args.seed}.{datetime_now}'
@@ -79,9 +87,11 @@ os.makedirs(exp_dir, exist_ok=True)
 logger = Logger.init_logger(filename=exp_dir + '/train.log')
 args_print(args, logger)
 
+
 for epoch in range(arguments.max_epoch):
     logger.info(f'Epoch: {epoch}')
     total_loss = 0
+    # training
     decoder.train()
     for batch_x, batch_y in train_data_loader:
         optimizer.zero_grad()
@@ -90,13 +100,12 @@ for epoch in range(arguments.max_epoch):
                 output = decoder(x.vector_with_noise)
                 loss = loss_fn(output, y)
                 total_loss += loss.item()
-                loss.backward()
+        loss.backward()
         optimizer.step()
     avgloss = total_loss / len(train_dataset)
     logger.info(f'train. loss: {avgloss}')
-    #print('avg. loss:', total_loss / len(train_dataset))
 
-    # test
+    # validation
     n_total = 0
     n_correct = 0
     decoder.eval()
@@ -108,13 +117,7 @@ for epoch in range(arguments.max_epoch):
                     output = decoder(x.vector_with_noise)
                     prediction = get_output(x.tokens_with_noise, output, label_converter)
                     expected = get_output(x.tokens_without_noise, y, label_converter)
-                    # print(output.shape, y.shape)
-                    # loss = loss_fn(output, y)
-                    # total_loss += loss.item()
                     if prediction == expected:
                         n_correct += 1
-    #test_loss = total_loss / n_total
-    #print(n_correct, n_total, 100*n_correct / n_total)
     acc = 100*n_correct / n_total
-    #logger.info(f'Test loss: {test_loss} Acc: {acc} correct: {n_correct} total: {n_total}')
     logger.info(f'Acc: {acc} correct: {n_correct} total: {n_total}')
