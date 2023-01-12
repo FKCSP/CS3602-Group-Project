@@ -88,15 +88,15 @@ for epoch in range(arguments.max_epoch):
     # training
     decoder.train()
     for batch_x, batch_y in train_data_loader:
-        optimizer.zero_grad()
         for round_x, round_y in zip(batch_x, batch_y):
             for x, y in zip(round_x, round_y):
-                output = decoder(x.vector_with_noise)
+                output = decoder(x.vector_without_noise)
                 loss = loss_fn(output, y)
-                total_loss += loss.item()
-        loss.backward()
-        optimizer.step()
-    avgloss = total_loss / len(train_dataset)
+                total_loss += loss
+    optimizer.zero_grad()
+    total_loss.backward()
+    optimizer.step()
+    avgloss = total_loss.item() / len(train_dataset)
     logger.info(f'train. loss: {avgloss}')
 
     # validation
