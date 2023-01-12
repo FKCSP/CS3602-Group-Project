@@ -15,18 +15,17 @@ class Example():
 
     @classmethod
     def load_dataset(cls, data_path):
-        dataset = json.load(open(data_path, 'r'))
+        datas = json.load(open(data_path, 'r'))
         examples = []
-        for di, data in enumerate(dataset):
-            for ui, utt in enumerate(data):
-                ex = cls(utt, f'{di}-{ui}')
+        for data in datas:
+            for utt in data:
+                ex = cls(utt)
                 examples.append(ex)
         return examples
 
-    def __init__(self, ex: dict, did):
+    def __init__(self, ex: dict):
         super(Example, self).__init__()
         self.ex = ex
-
 
         self.utt = ex['asr_1best']
         self.slot = {}
