@@ -30,11 +30,6 @@ class SLUTagging(nn.Module):
 
         return tag_output
 
-    def reset_parameters(self):
-        self.word_embed.reset_parameters()
-        self.rnn.reset_parameters()
-        self.output_layer.reset_parameters()
-
     def decode(self, label_vocab, batch):
         batch_size = len(batch)
         labels = batch.labels
@@ -88,6 +83,3 @@ class TaggingFNNDecoder(nn.Module):
             loss = self.loss_fct(logits.view(-1, logits.shape[-1]), labels.view(-1))
             return prob, loss
         return (prob, )
-
-    def reset_parameters(self):
-        self.output_layer.reset_parameters()

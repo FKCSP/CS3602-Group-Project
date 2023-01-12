@@ -4,7 +4,6 @@ from utils.vocab import Vocab, LabelVocab
 from utils.word2vec import Word2vecUtils
 from utils.evaluator import Evaluator
 
-
 class Example():
 
     @classmethod
@@ -16,17 +15,18 @@ class Example():
 
     @classmethod
     def load_dataset(cls, data_path):
-        datas = json.load(open(data_path, 'r', encoding='utf-8'))
+        dataset = json.load(open(data_path, 'r'))
         examples = []
-        for data in datas:
-            for utt in data:
-                ex = cls(utt)
+        for di, data in enumerate(dataset):
+            for ui, utt in enumerate(data):
+                ex = cls(utt, f'{di}-{ui}')
                 examples.append(ex)
         return examples
 
-    def __init__(self, ex: dict):
+    def __init__(self, ex: dict, did):
         super(Example, self).__init__()
         self.ex = ex
+
 
         self.utt = ex['asr_1best']
         self.slot = {}
