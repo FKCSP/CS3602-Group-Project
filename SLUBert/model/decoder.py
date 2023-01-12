@@ -1,19 +1,18 @@
 import torch
 from torch import nn
 
-from utils.arguments import arguments
+from SLUBert.utils.arguments import arguments
 
 
 class SimpleDecoder(nn.Module):
-    def __init__(self, in_len: int, out_len: int, args):
+    def __init__(self, in_len: int, out_len: int):
         super().__init__()
-        print(in_len,out_len)
-        hidden_size = args.hidden_size
+        hidden_size = arguments.hidden_size
         self.fnn = nn.Sequential(
             nn.Linear(hidden_size, out_len),
             nn.Softmax(dim=1)
         )
-        self.rnn = getattr(nn, args.rnn)(input_size=in_len, hidden_size=hidden_size // 2, num_layers=args.num_layer,
+        self.rnn = getattr(nn, arguments.rnn)(input_size=in_len, hidden_size=hidden_size // 2, num_layers=arguments.num_layer,
                           batch_first=True, bidirectional=True, dropout=0.1)
 
     def forward(self, x):
@@ -22,7 +21,7 @@ class SimpleDecoder(nn.Module):
 
 
 class MultiTurnDecoder(nn.Module):
-    def __init__(self, in_len: int, out_len: int, arg, encoder='GRU', cencoder='GRU'):
+    def __init__(self, in_len: int, out_len: int, encoder='GRU', cencoder='GRU'):
         super().__init__()
 
         self._memory = []

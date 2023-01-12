@@ -12,13 +12,13 @@ import torch
 from torch import nn
 from torch.optim import Adam
 
-from model.decoder import SimpleDecoder
-from utils.arguments import arguments
-from dataset.data import BIO, Label, LabelConverter, MyDataLoader, MyDataset
+from SLUBert.model.decoder import SimpleDecoder
+from SLUBert.utils.arguments import arguments
+from SLUBert.dataset.data import BIO, Label, LabelConverter, MyDataLoader, MyDataset
 
 from datetime import datetime
-from utils.logger import Logger
-from utils.initialization import args_print
+from SLUBert.utils.logger import Logger
+from SLUBert.utils.initialization import args_print
 
 def get_output(text: List[str], output: torch.Tensor, label_converter: LabelConverter) -> List[Tuple[str, str, str]]:
     ret = []
@@ -57,7 +57,7 @@ label_converter = LabelConverter('data/ontology.json')
 pretrained_model_name = 'bert-base-chinese'
 
 # make directory
-cache_dir = './SLUBert/cache'
+cache_dir = 'cache'
 os.makedirs(cache_dir, exist_ok=True)
 
 # prepare dataset & dataloader
@@ -74,12 +74,11 @@ loss_fn = nn.CrossEntropyLoss()
 
 # logger information
 datetime_now = datetime.now().strftime("%Y%m%d-%H%M%S")
-args = arguments
-experiment_name = f'bert.lr_{args.lr}.rnn_{args.rnn}.hidden_{args.hidden_size}.layer_{args.num_layer}.batch_{args.batch_size}.seed_{args.seed}.{datetime_now}'
+experiment_name = f'bert.lr_{arguments.lr}.rnn_{arguments.rnn}.hidden_{arguments.hidden_size}.layer_{arguments.num_layer}.batch_{arguments.batch_size}.seed_{arguments.seed}.{datetime_now}'
 exp_dir = os.path.join('result/', experiment_name)
 os.makedirs(exp_dir, exist_ok=True)
 logger = Logger.init_logger(filename=exp_dir + '/train.log')
-args_print(args, logger)
+args_print(arguments, logger)
 
 
 for epoch in range(arguments.max_epoch):

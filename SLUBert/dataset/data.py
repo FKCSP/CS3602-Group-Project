@@ -11,7 +11,7 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 from transformers import BertModel, BertTokenizer
 
-from utils.arguments import arguments
+from SLUBert.utils.arguments import arguments
 
 
 class BIO(Enum):
