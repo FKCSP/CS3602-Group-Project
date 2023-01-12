@@ -33,7 +33,6 @@ class SLUTagging(nn.Module):
     def decode(self, label_vocab, batch):
         batch_size = len(batch)
         labels = batch.labels
-        print(labels)
         output = self.forward(batch)
         prob = output[0] # desert loss if exists
         lengths_lst = batch.lengths_lst
