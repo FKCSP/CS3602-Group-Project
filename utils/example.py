@@ -50,6 +50,7 @@ class conversation():
         self.input_idx = []
         self.tag_id = []
         self.ex_lst = []
+        self.lengths_lst = []
 
     def app(self, ex):
         if self.utt:
@@ -60,3 +61,4 @@ class conversation():
         self.input_idx += ex.input_idx
         self.tag_id += ex.tag_id
         self.ex_lst.append(ex)
+        self.lengths_lst.append(len(ex.utt))
