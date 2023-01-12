@@ -17,17 +17,14 @@ class Example():
     def load_dataset(cls, data_path):
         dataset = json.load(open(data_path, 'r'))
         examples = []
-        for di, data in enumerate(dataset):
-            for ui, utt in enumerate(data):
-                ex = cls(utt, f'{di}-{ui}')
-                examples.append(ex)
+        for data in dataset:
+            conv = conversation()
+            for utt in data:
+                conv.app(cls(utt))
+            examples.append(conv)
         return examples
 
-    def __init__(self, ex: dict, did):
-        super(Example, self).__init__()
-        self.ex = ex
-        self.did = did
-
+    def __init__(self, ex: dict):
         self.utt = ex['asr_1best']
         self.slot = {}
         for label in ex['semantic']:
@@ -45,3 +42,21 @@ class Example():
         self.input_idx = [Example.word_vocab[c] for c in self.utt]
         l = Example.label_vocab
         self.tag_id = [l.convert_tag_to_idx(tag) for tag in self.tags]
+
+
+class conversation():
+    def __init__(self):
+        self.utt = ""
+        self.input_idx = []
+        self.tag_id = []
+        self.ex_lst = []
+
+    def app(self, ex):
+        if self.utt:
+            self.utt += ';'
+            self.input_idx.append(2)
+            self.tag_id.append("O")
+        self.utt.append(ex.utt)
+        self.input_idx += ex.input_idx
+        self.tag_id += ex.tag_id
+        self.ex_lst.append(ex)

@@ -2,7 +2,7 @@
 import os, json
 PAD = '<pad>'
 UNK = '<unk>'
-SEP = '<sep>'
+SEP = ';'
 
 
 class Vocab():

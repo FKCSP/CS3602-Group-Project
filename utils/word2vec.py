@@ -1,7 +1,7 @@
 #coding=utf8
 
 import numpy as np
-from utils.vocab import PAD, UNK
+from utils.vocab import PAD, UNK, SEP
 import torch
 
 class Word2vecUtils():
@@ -16,9 +16,10 @@ class Word2vecUtils():
         """
         emb_size = module.weight.data.size(-1)
         outliers = 0
+        module.weight.data[vocab[PAD]] = torch.zeros(emb_size, dtype=torch.float, device=device)
+        module.weight.data[vocab[SEP]] = torch.zeros(emb_size, dtype=torch.float, device=device)
         for word in vocab.word2id:
-            if word == PAD: # PAD symbol is always 0-vector
-                module.weight.data[vocab[PAD]] = torch.zeros(emb_size, dtype=torch.float, device=device)
+            if word == PAD or work == SEP: # PAD symbol is always 0-vector
                 continue
             word_emb = self.word2vec.get(word, self.word2vec[UNK])
             module.weight.data[vocab[word]] = torch.tensor(word_emb, dtype=torch.float, device=device)
