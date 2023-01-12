@@ -17,7 +17,11 @@ def from_example_list(args, ex_list, device='cpu', train=True):
     batch.lengths_lst = [ex.lengths_lst for ex in ex_list]
 
     if train:
-        # batch.labels = [ex.slotvalue for ex in ex_list]
+        batch.labels = []
+        for conv in batch.examples:
+            for st in conv.labels:
+                batch.labels.append(st)
+
         tag_lens = [len(ex.tag_id) for ex in ex_list]
         max_tag_lens = max(tag_lens)
         tag_ids = [ex.tag_id + [tag_pad_idx] * (max_tag_lens - len(ex.tag_id)) for ex in ex_list]

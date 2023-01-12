@@ -32,8 +32,8 @@ class SLUTagging(nn.Module):
 
     def decode(self, label_vocab, batch):
         batch_size = len(batch)
-        # labels = batch.labels
-        labels = [ex.slotvalue for conv in batch.examples for ex in conv.ex_lst]
+        labels = batch.labels
+        print(labels)
         output = self.forward(batch)
         prob = output[0] # desert loss if exists
         lengths_lst = batch.lengths_lst
@@ -45,17 +45,14 @@ class SLUTagging(nn.Module):
             accum_idx = 0
             for l in lens:
                 pred = pred_whole[accum_idx : accum_idx + l]
-                accum_idx += l + 1
-
                 pred_tuple = []
                 idx_buff, tag_buff, pred_tags = [], [], []
-                pred = pred[:len(batch.utt[i])]
                 for idx, tid in enumerate(pred):
                     tag = label_vocab.convert_idx_to_tag(tid)
                     pred_tags.append(tag)
                     if (tag == 'O' or tag.startswith('B')) and len(tag_buff) > 0:
                         slot = '-'.join(tag_buff[0].split('-')[1:])
-                        value = ''.join([batch.utt[i][j] for j in idx_buff])
+                        value = ''.join([batch.utt[i][accum_idx+j] for j in idx_buff])
                         idx_buff, tag_buff = [], []
                         pred_tuple.append(f'{slot}-{value}')
                         if tag.startswith('B'):
@@ -66,9 +63,10 @@ class SLUTagging(nn.Module):
                         tag_buff.append(tag)
                 if len(tag_buff) > 0:
                     slot = '-'.join(tag_buff[0].split('-')[1:])
-                    value = ''.join([batch.utt[i][j] for j in idx_buff])
+                    value = ''.join([batch.utt[i][accum_idx+j] for j in idx_buff])
                     pred_tuple.append(f'{slot}-{value}')
                 predictions.append(pred_tuple)
+                accum_idx += l + 1
         if len(output) == 1:
             return predictions
         else:
