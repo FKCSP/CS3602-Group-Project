@@ -1,8 +1,9 @@
-#coding=utf8
+# coding=utf8
 
 import numpy as np
 from SLUBase.dataset.vocab import PAD, UNK
 import torch
+
 
 class Word2vecUtils():
 
@@ -17,7 +18,7 @@ class Word2vecUtils():
         emb_size = module.weight.data.size(-1)
         outliers = 0
         for word in vocab.word2id:
-            if word == PAD: # PAD symbol is always 0-vector
+            if word == PAD:  # PAD symbol is always 0-vector
                 module.weight.data[vocab[PAD]] = torch.zeros(emb_size, dtype=torch.float, device=device)
                 continue
             word_emb = self.word2vec.get(word, self.word2vec[UNK])

@@ -98,13 +98,13 @@ def predict():
             for pi, p in enumerate(pred):
                 did = current_batch.did[pi]
                 predictions[did] = p
-    test_json = json.load(open(test_path, 'r'))
+    test_json = json.load(open(test_path, 'r', encoding='utf-8'))
     ptr = 0
     for ei, example in enumerate(test_json):
         for ui, utt in enumerate(example):
             utt['pred'] = [pred.split('-') for pred in predictions[f"{ei}-{ui}"]]
             ptr += 1
-    json.dump(test_json, open(os.path.join(args.dataroot, 'prediction.json'), 'w'), indent=4, ensure_ascii=False)
+    json.dump(test_json, open(os.path.join(args.dataroot, 'prediction.json'), 'w', encoding='utf-8'), indent=4, ensure_ascii=False)
 
 
 if not args.testing:
@@ -149,7 +149,7 @@ if not args.testing:
                 torch.save({
                     'epoch': i, 'model': model.state_dict(),
                     'optim': optimizer.state_dict(),
-                }, open(f'model{run}.bin', 'wb'))
+                }, open(f'model{run}.bin', 'wb', encoding='utf-8'))
                 #logger.info('NEW BEST MODEL: \tEpoch: %d\tDev loss: %.4f\tDev acc: %.2f\tDev fscore(p/r/f): (%.2f/%.2f/%.2f)' % (i, dev_loss, dev_acc, dev_fscore['precision'], dev_fscore['recall'], dev_fscore['fscore']))
         all_result['acc'].append(best_result['dev_acc'])
         all_result['precision'].append(best_result['dev_f1']['precision'])
