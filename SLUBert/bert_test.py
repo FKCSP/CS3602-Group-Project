@@ -81,7 +81,7 @@ for epoch in range(arguments.max_epoch):
     acc = evaluator.accuracy_rate
     f1_score = evaluator.f1_score
     avg_loss = total_loss.item() / len(dev_dataset)
-    logger.info(f'Acc: {acc:.2f}, F1 Score: {f1_score:.2f}, Avg. Loss: {avg_loss:.5f}')
+    logger.info(f'Acc: {acc:.5f}, F1 Score: {f1_score:.5f}, Avg. Loss: {avg_loss:.5f}')
     if acc > best_acc:
         best_acc = acc
         torch.save({
