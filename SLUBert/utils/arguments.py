@@ -19,6 +19,8 @@ class Arguments:
     batch_size: int
     seed: int
     num_layer: int
+    noise: bool
+
 
 def init_args(params=sys.argv[1:]) -> Arguments:
     arg_parser = argparse.ArgumentParser()
@@ -30,7 +32,8 @@ def init_args(params=sys.argv[1:]) -> Arguments:
 def add_argument_base(arg_parser):
     #### General configuration ####
     arg_parser.add_argument('--device', type=str, default='cuda',
-                             help='Use which device: -1 -> cpu ; the index of gpu o.w.')
+                            help='Use which device: -1 -> cpu ; the index of gpu o.w.')
+    arg_parser.add_argument('--noise', type=int, default='1')
     # arg_parser.add_argument('--device', type=int, default=-1,
     #                          help='Use which device: -1 -> cpu ; the index of gpu o.w.')
     #arg_parser.add_argument('--seed', nargs='?', default='[99,999,9999,99999,114514]', help='Random seed')

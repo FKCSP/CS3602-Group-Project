@@ -74,7 +74,8 @@ for epoch in range(arguments.max_epoch):
                     output = decoder(x.vector_without_noise)
                     loss = loss_fn(output, y)
                     total_loss += loss
-                    prediction = get_output(x.tokens_with_noise, output, label_converter)
+                    input_tokens = x.tokens_with_noise if arguments.noise else x.tokens_without_noise
+                    prediction = get_output(input_tokens, output, label_converter)
                     expected = get_output(x.tokens_without_noise, y, label_converter)
                     evaluator.add_result(prediction, expected)
     acc = evaluator.accuracy_rate
