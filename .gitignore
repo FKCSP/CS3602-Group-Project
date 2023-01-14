@@ -5,6 +5,7 @@ bert.sh
 *.bin
 cache
 trained-models
+data/test.json
 
 # JetBrains PyCharm IDE
 .idea/
