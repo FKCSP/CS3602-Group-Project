@@ -99,7 +99,7 @@ for run, seed in enumerate(random_seeds):
                 'optim': optimizer.state_dict(),
                 'seed': seed,
                 'run': run,
-            }, 'trained-models/slu-bert_{run}.bin')
+            }, f'trained-models/slu-bert_{run}.bin')
     best_accuracies.append(best_acc)
     best_f1_scores.append(best_f1_score)
     best_precisions.append(best_precision)
