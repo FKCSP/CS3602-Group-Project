@@ -34,15 +34,10 @@ def add_argument_base(arg_parser):
     arg_parser.add_argument('--device', type=str, default='cuda',
                             help='Use which device: -1 -> cpu ; the index of gpu o.w.')
     arg_parser.add_argument('--noise', type=int, default='1')
-    # arg_parser.add_argument('--device', type=int, default=-1,
-    #                          help='Use which device: -1 -> cpu ; the index of gpu o.w.')
-    #arg_parser.add_argument('--seed', nargs='?', default='[99,999,9999,99999,114514]', help='Random seed')
-    arg_parser.add_argument('--seed', default=114514, type=int, help='Random seed')
     #### Training Hyperparams ####
     arg_parser.add_argument('--lr', type=float, default=1e-3, help='learning rate')
     arg_parser.add_argument('--weight_decay', type=float, default=0, help='weight decay')
     arg_parser.add_argument('--max_epoch', type=int, default=150, help='terminate after maximum epochs')
-    arg_parser.add_argument('--runs', type=int, default=5, help='number of distinct runs')
     arg_parser.add_argument('--batch_size', default=32, type=int, help='Batch size')
     arg_parser.add_argument('--num_layer', default=1, type=int, help='number of layer')
     arg_parser.add_argument('--rnn', default='GRU', choices=['LSTM', 'GRU', 'RNN'], help='type of rnn')

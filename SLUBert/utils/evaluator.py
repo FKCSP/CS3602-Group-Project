@@ -22,13 +22,13 @@ class Evaluator:
     @property
     def precision_rate(self) -> float:
         if self._n_prediction_tags == 0:
-            return 0
+            return 0.0
         return self._n_correct_tags / self._n_prediction_tags
 
     @property
     def recall_rate(self) -> float:
         if self._n_truth_tags == 0:
-            return 0
+            return 0.0
         return self._n_correct_tags / self._n_truth_tags
 
     @property
@@ -40,5 +40,5 @@ class Evaluator:
         p = self.precision_rate
         r = self.recall_rate
         if p + r == 0:
-            return 0
+            return 0.0
         return 2 * p * r / (p + r)
