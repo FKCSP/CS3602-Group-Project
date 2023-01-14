@@ -14,7 +14,7 @@ from torch.optim import Adam
 
 from model.decoder import MultiTurnDecoder
 from utils.arguments import arguments
-from utils.data import BIO, Label, LabelConverter, MyDataLoader, MyDataset
+from dataset.data import BIO, Label, LabelConverter, MyDataLoader, MyDataset
 
 
 def get_output(text: List[str], output: torch.Tensor, label_converter: LabelConverter) -> List[Tuple[str, str, str]]:

@@ -1,5 +1,6 @@
 import hashlib
 import json
+import os
 import re
 import sys
 from dataclasses import dataclass
@@ -10,8 +11,7 @@ from typing import Iterator, List, Tuple
 import torch
 from torch.utils.data import DataLoader, Dataset
 from transformers import BertModel, BertTokenizer
-
-from SLUBert.utils.arguments import arguments
+from utils.arguments import arguments
 
 
 class BIO(Enum):
@@ -73,6 +73,7 @@ class MyDataset(Dataset):
     pattern = re.compile(r'\(.*\)')
 
     def __init__(self, data_path, label_converter: LabelConverter, model_name: str, cache_dir):
+        os.makedirs(cache_dir, exist_ok=True)
         md5 = hashlib.md5((model_name + data_path + cache_dir).encode('utf-8')).hexdigest()
         cache_path = Path(cache_dir) / md5
         if cache_path.is_file():

@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from SLUBert.utils.arguments import arguments
+from utils.arguments import arguments
 
 
 class SimpleDecoder(nn.Module):
@@ -12,8 +12,8 @@ class SimpleDecoder(nn.Module):
             nn.Linear(hidden_size, out_len),
             nn.Softmax(dim=1)
         )
-        self.rnn = getattr(nn, arguments.rnn)(input_size=in_len, hidden_size=hidden_size // 2, num_layers=arguments.num_layer,
-                          batch_first=True, bidirectional=True, dropout=0.1)
+        self.rnn = getattr(nn, arguments.rnn)(input_size=in_len, hidden_size=hidden_size // 2,
+                                              num_layers=arguments.num_layer, batch_first=True, bidirectional=True, dropout=0.1)
 
     def forward(self, x):
         x = self.rnn(x)[0]
@@ -31,9 +31,11 @@ class MultiTurnDecoder(nn.Module):
         self._memory_len = 256
 
         self.encoder = getattr(nn, encoder)(input_size=in_len, hidden_size=self._memory_len // 2, num_layers=1,
-                              batch_first=True, bidirectional=True, dropout=0.1)
-        self.contextual_encoder = getattr(nn, cencoder)(input_size=in_len, hidden_size=self._memory_len // 2, num_layers=1,
-                                         batch_first=True, bidirectional=True, dropout=0.1)
+                                            batch_first=True, bidirectional=True, dropout=0.1)
+        self.contextual_encoder = getattr(
+            nn, cencoder)(
+            input_size=in_len, hidden_size=self._memory_len // 2, num_layers=1, batch_first=True, bidirectional=True,
+            dropout=0.1)
         self.knowledge_encoder = nn.Linear(self._memory_len, self._knowledge_len)
         self.decoder = SimpleDecoder(in_len, out_len)
 
