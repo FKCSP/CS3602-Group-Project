@@ -4,6 +4,7 @@ model.bin
 bert.sh
 *.bin
 cache
+trained-models
 
 # JetBrains PyCharm IDE
 .idea/

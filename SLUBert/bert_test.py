@@ -1,9 +1,8 @@
 import os
 from datetime import datetime
-from typing import List, Tuple
 
 import torch
-from dataset.data import BIO, Label, LabelConverter, MyDataLoader, MyDataset
+from dataset.data import LabelConverter, MyDataLoader, MyDataset
 from model.decoder import SimpleDecoder
 from torch import nn
 from torch.optim import Adam
@@ -13,6 +12,8 @@ from utils.initialization import args_print
 from utils.logger import Logger
 from utils.output import get_output
 from utils.random import set_random_seed
+
+os.makedirs('trained-models', exist_ok=True)
 
 # set random seed
 set_random_seed(arguments.seed)
@@ -40,6 +41,8 @@ os.makedirs(exp_dir, exist_ok=True)
 logger = Logger.init_logger(filename=exp_dir + '/train.log')
 args_print(arguments, logger)
 
+
+best_acc = 0
 
 for epoch in range(arguments.max_epoch):
     logger.info(f'Epoch: {epoch}')
@@ -78,3 +81,9 @@ for epoch in range(arguments.max_epoch):
     f1_score = evaluator.f1_score
     avg_loss = total_loss.item() / len(dev_dataset)
     logger.info(f'Acc: {acc:.2f}, F1 Score: {f1_score:.2f}, Avg. Loss: {avg_loss:.5f}')
+    if acc > best_acc:
+        best_acc = acc
+        torch.save({
+            'epoch': epoch, 'model': decoder.state_dict(),
+            'optim': optimizer.state_dict(),
+        }, 'trained-models/slu-bert.bin')
