@@ -135,15 +135,14 @@ if not args.testing:
                 optimizer.step()
                 optimizer.zero_grad()
                 count += 1
-            #logger.info('Training: \tEpoch: %d\tTime: %.4f\tTraining Loss: %.4f' % (i, time.time() - start_time, epoch_loss / count))
+            logger.info('Training: \tEpoch: %d\tTime: %.4f\tTraining Loss: %.4f' % (i, time.time() - start_time, epoch_loss / count))
             torch.cuda.empty_cache()
             gc.collect()
 
             start_time = time.time()
             metrics, dev_loss = decode('dev')
             dev_acc, dev_fscore = metrics['acc'], metrics['fscore']
-            logger.info('Epoch: %d\t %.4f  %.4f' % (i, epoch_loss / count, dev_loss))
-            print('Evaluation: \tEpoch: %d\tTime: %.4f\tDev acc: %.2f\tDev fscore(p/r/f): (%.2f/%.2f/%.2f)' % (i, time.time() - start_time, dev_acc, dev_fscore['precision'], dev_fscore['recall'], dev_fscore['fscore']))
+            logger.info('Evaluation: \tEpoch: %d\tTime: %.4f\tDev acc: %.2f\tDev fscore(p/r/f): (%.2f/%.2f/%.2f)' % (i, time.time() - start_time, dev_acc, dev_fscore['precision'], dev_fscore['recall'], dev_fscore['fscore']))
             if dev_acc > best_result['dev_acc']:
                 best_result['dev_loss'], best_result['dev_acc'], best_result['dev_f1'], best_result['iter'] = dev_loss, dev_acc, dev_fscore, i
                 torch.save({
