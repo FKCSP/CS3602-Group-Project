@@ -20,6 +20,7 @@ def get_output(text: List[str], output: torch.Tensor, label_converter: LabelConv
         elif v.bio == BIO.O and start != -1:
             value = ''.join(text[start:i])
             ret.append([act, slot, value])
+            start = -1
         elif v.bio == BIO.I and (v.act, v.slot) != (act, slot):
             # invalid tag sequence
             return []
