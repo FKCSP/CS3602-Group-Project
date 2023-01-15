@@ -14,6 +14,10 @@ def get_output(text: List[str], output: torch.Tensor, label_converter: LabelConv
     slot = ''
     for i, v in enumerate(labels):
         if v.bio == BIO.B:
+            if start != -1:
+                value = ''.join(text[start:i])
+                ret.append([act, slot, value])
+                start = -1
             start = i
             act = v.act
             slot = v.slot
