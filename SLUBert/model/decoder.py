@@ -28,7 +28,7 @@ class MultiTurnDecoder(nn.Module):
 
         # the length of knowledge vectors must be equal to that of input vectors
         self._knowledge_len = in_len
-        self._memory_len = 256
+        self._memory_len = 128
 
         self.encoder = getattr(nn, encoder)(input_size=in_len, hidden_size=self._memory_len // 2, num_layers=1,
                                             batch_first=True, bidirectional=True, dropout=0.1)
@@ -41,6 +41,7 @@ class MultiTurnDecoder(nn.Module):
 
     def forward(self, c):
         c_memory = self.contextual_encoder(c)[0][-1, :]
+        print('c_memory')
         u = self.encoder(c)[0][-1, :]
         p = torch.zeros(len(self._memory))
         if len(self._memory) > 0:
@@ -53,6 +54,7 @@ class MultiTurnDecoder(nn.Module):
         h = h.to(arguments.device)
         o = self.knowledge_encoder(u + h).to(arguments.device)
         self._memory.append(c_memory.detach())
+        print('_memory')
         return self.decoder(c + o)
 
     def reset(self) -> None:

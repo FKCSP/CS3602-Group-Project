@@ -16,7 +16,7 @@ from utils.random import set_random_seed
 os.makedirs('trained-models', exist_ok=True)
 
 random_seeds = [99, 999, 9999, 99999, 114514]
-
+random_seeds = [99]
 
 # prepare dataset & dataloader
 label_converter = LabelConverter('data/ontology.json')
@@ -30,7 +30,7 @@ encoding_len = train_dataset[0][0][0].vector_with_noise.shape[1]
 
 # logger information
 datetime_now = datetime.now().strftime("%Y%m%d-%H%M%S")
-experiment_name = f'bert.lr_{arguments.lr}.rnn_{arguments.rnn}.hidden_{arguments.hidden_size}.layer_{arguments.num_layer}.{datetime_now}'
+experiment_name = f'multibert.lr_{arguments.lr}.rnn_{arguments.rnn}.hidden_{arguments.hidden_size}.layer_{arguments.num_layer}.{datetime_now}'
 exp_dir = os.path.join('result/', experiment_name)
 os.makedirs(exp_dir, exist_ok=True)
 logger = Logger.init_logger(filename=exp_dir + '/train.log')
@@ -103,7 +103,7 @@ for run, seed in enumerate(random_seeds):
                 'optim': optimizer.state_dict(),
                 'seed': seed,
                 'run': run,
-            }, f'trained-models/slu-bert-{arguments.rnn}_{run}.bin')
+            }, f'trained-models/slu-bert-multi-{arguments.rnn}_{run}.bin')
     best_accuracies.append(best_acc)
     best_f1_scores.append(best_f1_score)
     best_precisions.append(best_precision)

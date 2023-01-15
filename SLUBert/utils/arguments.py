@@ -31,7 +31,7 @@ def init_args(params=sys.argv[1:]) -> Arguments:
 
 def add_argument_base(arg_parser):
     #### General configuration ####
-    arg_parser.add_argument('--device', type=str, default='cuda',
+    arg_parser.add_argument('--device', type=str, default='cuda:1',
                             help='Use which device: -1 -> cpu ; the index of gpu o.w.')
     arg_parser.add_argument('--noise', type=int, default='1')
     #### Training Hyperparams ####

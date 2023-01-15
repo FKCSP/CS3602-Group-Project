@@ -15,7 +15,7 @@ from utils.random import set_random_seed
 
 os.makedirs('trained-models', exist_ok=True)
 
-random_seeds = [99, 999, 9999, 99999, 114514]
+random_seeds = [99,999,9999,99999,114514]
 
 
 # prepare dataset & dataloader
@@ -46,6 +46,8 @@ for run, seed in enumerate(random_seeds):
     # model configuration
     set_random_seed(seed)
     decoder = SimpleDecoder(encoding_len, label_converter.num_indexes).to(arguments.device)
+    # check_point = torch.load(open('trained-models/slu-bert-LSTM-final.bin', 'rb'), map_location=arguments.device)
+    # decoder.load_state_dict(check_point['model'])
     optimizer = Adam(decoder.parameters(), lr=arguments.lr, weight_decay=arguments.weight_decay)
     loss_fn = nn.CrossEntropyLoss()
 
@@ -67,7 +69,7 @@ for run, seed in enumerate(random_seeds):
             batch_loss.backward()
             optimizer.step()
         avg_loss = total_loss.item() / len(train_dataset)
-        # logger.info(f'train. loss: {avg_loss}')
+        logger.info(f'Epoch: {epoch}  train. loss: {avg_loss}')
 
         # validation
         evaluator = Evaluator()
@@ -86,9 +88,10 @@ for run, seed in enumerate(random_seeds):
                         expected = get_output(x.tokens_with_noise, y, label_converter)
                         evaluator.add_result(prediction, expected)
         acc = evaluator.accuracy_rate
+        pred,recall = evaluator.precision_rate, evaluator.recall_rate
         f1_score = evaluator.f1_score
         avg_loss = total_loss.item() / len(dev_dataset)
-        # logger.info(f'Acc: {acc:.5f}, F1 Score: {f1_score:.5f}, Avg. Loss: {avg_loss:.5f}')
+        logger.info(f'Acc: {acc:.5f}, F1 Score: {pred:.5f},{recall:.5f},{f1_score:.5f}, Avg. Loss: {avg_loss:.5f}')
         if acc > best_acc:
             # logger.info('New best!')
             best_acc = acc
@@ -101,7 +104,7 @@ for run, seed in enumerate(random_seeds):
                 'optim': optimizer.state_dict(),
                 'seed': seed,
                 'run': run,
-            }, f'trained-models/slu-bert-{arguments.rnn}_{run}.bin')
+            }, f'trained-models/slu-bert-{arguments.rnn}-{run}.bin')
     best_accuracies.append(best_acc)
     best_f1_scores.append(best_f1_score)
     best_precisions.append(best_precision)

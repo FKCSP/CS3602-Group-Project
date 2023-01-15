@@ -13,7 +13,7 @@ output_path = 'data/test.json'
 with open(test_data_path, encoding='utf-8') as f:
     test_data = json.load(f)
 
-set_random_seed(0)
+set_random_seed(114514)
 
 
 label_converter = LabelConverter('data/ontology.json')
@@ -22,7 +22,7 @@ tokenizer = BertTokenizer.from_pretrained(pretrained_model_name)
 bert = BertModel.from_pretrained(pretrained_model_name)
 
 decoder = SimpleDecoder(768, label_converter.num_indexes).to(arguments.device)
-check_point = torch.load(open('trained-models/slu-bert.bin', 'rb'), map_location=arguments.device)
+check_point = torch.load(open('trained-models/bert-GRU-final.bin', 'rb'), map_location=arguments.device)
 decoder.load_state_dict(check_point['model'])
 
 for i in test_data:
@@ -35,4 +35,4 @@ for i in test_data:
         j['pred'] = pred
 
 with open(output_path, 'w', encoding='utf-8') as f:
-    json.dump(test_data, f, ensure_ascii=False)
+    json.dump(test_data, f, ensure_ascii=False, indent=4)

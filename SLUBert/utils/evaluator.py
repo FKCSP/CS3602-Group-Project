@@ -10,14 +10,14 @@ class Evaluator:
         self._n_correct_tags = 0
 
     def add_result(self, pred: Sequence, truth: Sequence) -> None:
-        pred = [tuple(i) for i in pred]
-        truth = [tuple(i) for i in truth]
+        pred = set([tuple(i) for i in pred])
+        truth = set([tuple(i) for i in truth])
         self._n_sentences += 1
         if pred == truth:
             self._n_correct_sentences += 1
         self._n_prediction_tags += len(pred)
         self._n_truth_tags += len(truth)
-        self._n_correct_tags += len(set(pred) & set(truth))
+        self._n_correct_tags += len(pred & truth)
 
     @property
     def precision_rate(self) -> float:
