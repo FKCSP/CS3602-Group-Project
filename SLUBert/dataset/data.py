@@ -106,7 +106,7 @@ class MyDataset(Dataset):
                 tokens_with_noise = tokenizer.tokenize(text_with_noise)
                 tokens_without_noise = tokenizer.tokenize(text_without_noise)
                 features[k] = Sentence(vector_with_noise, vector_without_noise, tokens_with_noise, tokens_without_noise)
-                bio_labels = self._get_bio_labels(tokens_without_noise, j['semantic'])
+                bio_labels = self._get_bio_labels(tokens_with_noise, j['semantic'])
                 tensor = torch.zeros([len(bio_labels), self.label_converter.num_indexes])
                 for i2, v2 in enumerate(bio_labels):
                     tensor[i2, v2] = 1

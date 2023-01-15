@@ -59,7 +59,7 @@ for run, seed in enumerate(random_seeds):
             batch_loss = 0
             for round_x, round_y in zip(batch_x, batch_y):
                 for x, y in zip(round_x, round_y):
-                    output = decoder(x.vector_without_noise)
+                    output = decoder(x.vector_with_noise)
                     loss = loss_fn(output, y)
                     total_loss += loss
                     batch_loss += loss
@@ -83,7 +83,7 @@ for run, seed in enumerate(random_seeds):
                         total_loss += loss
                         input_tokens = x.tokens_with_noise if arguments.noise else x.tokens_without_noise
                         prediction = get_output(input_tokens, output, label_converter)
-                        expected = get_output(x.tokens_without_noise, y, label_converter)
+                        expected = get_output(x.tokens_with_noise, y, label_converter)
                         evaluator.add_result(prediction, expected)
         acc = evaluator.accuracy_rate
         f1_score = evaluator.f1_score
