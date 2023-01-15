@@ -17,6 +17,7 @@ os.makedirs('trained-models', exist_ok=True)
 
 random_seeds = [99, 999, 9999, 99999, 114514]
 
+
 # prepare dataset & dataloader
 label_converter = LabelConverter('data/ontology.json')
 pretrained_model_name = 'bert-base-chinese'
@@ -26,11 +27,6 @@ dev_dataset = MyDataset('data/development.json', label_converter, pretrained_mod
 train_data_loader = MyDataLoader(train_dataset, batch_size=arguments.batch_size, shuffle=True)
 dev_data_loader = MyDataLoader(dev_dataset)
 encoding_len = train_dataset[0][0][0].vector_with_noise.shape[1]
-
-# model configuration
-decoder = SimpleDecoder(encoding_len, label_converter.num_indexes).to(arguments.device)
-optimizer = Adam(decoder.parameters(), lr=arguments.lr, weight_decay=arguments.weight_decay)
-loss_fn = nn.CrossEntropyLoss()
 
 # logger information
 datetime_now = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -47,7 +43,12 @@ best_precisions = []
 best_recalls = []
 
 for run, seed in enumerate(random_seeds):
+    # model configuration
     set_random_seed(seed)
+    decoder = SimpleDecoder(encoding_len, label_converter.num_indexes).to(arguments.device)
+    optimizer = Adam(decoder.parameters(), lr=arguments.lr, weight_decay=arguments.weight_decay)
+    loss_fn = nn.CrossEntropyLoss()
+
     best_acc = 0
     for epoch in range(arguments.max_epoch):
         # logger.info(f'Epoch: {epoch}')
@@ -76,7 +77,8 @@ for run, seed in enumerate(random_seeds):
             for batch_x, batch_y in dev_data_loader:
                 for round_x, round_y in zip(batch_x, batch_y):
                     for x, y in zip(round_x, round_y):
-                        output = decoder(x.vector_without_noise)
+                        input_vector = x.vector_with_noise if arguments.noise else x.vector_without_noise
+                        output = decoder(input_vector)
                         loss = loss_fn(output, y)
                         total_loss += loss
                         input_tokens = x.tokens_with_noise if arguments.noise else x.tokens_without_noise
@@ -105,7 +107,8 @@ for run, seed in enumerate(random_seeds):
     best_precisions.append(best_precision)
     best_recalls.append(best_recall)
 
-logger.info("Dev ACC:{:.2f}-+-{:.2f} Precision:{:.2f}-+-{:.2f} Recall:{:.2f}-+-{:.2f} F score:{:.2f}-+-{:.2f}".format(
+print(best_accuracies)
+logger.info("Dev ACC:{:.4f}-+-{:.2f} Precision:{:.4f}-+-{:.2f} Recall:{:.4f}-+-{:.2f} F score:{:.4f}-+-{:.2f}".format(
     torch.tensor(best_accuracies).mean(), torch.tensor(best_accuracies).std(),
     torch.tensor(best_precisions).mean(), torch.tensor(best_precisions).std(),
     torch.tensor(best_recalls).mean(), torch.tensor(best_recalls).std(),
