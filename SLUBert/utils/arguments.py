@@ -31,7 +31,7 @@ def init_args(params=sys.argv[1:]) -> Arguments:
 
 def add_argument_base(arg_parser):
     #### General configuration ####
-    arg_parser.add_argument('--device', type=str, default='cuda:1',
+    arg_parser.add_argument('--device', type=str, default='cuda',
                             help='Use which device: -1 -> cpu ; the index of gpu o.w.')
     arg_parser.add_argument('--noise', type=int, default='1')
     #### Training Hyperparams ####
@@ -41,7 +41,7 @@ def add_argument_base(arg_parser):
     arg_parser.add_argument('--batch_size', default=32, type=int, help='Batch size')
     arg_parser.add_argument('--num_layer', default=1, type=int, help='number of layer')
     arg_parser.add_argument('--rnn', default='GRU', choices=['LSTM', 'GRU', 'RNN'], help='type of rnn')
-    arg_parser.add_argument('--hidden_size', default=512, type=int, help='hidden size')
+    arg_parser.add_argument('--hidden_size', default=128, type=int, help='hidden size')
     return arg_parser
 
 

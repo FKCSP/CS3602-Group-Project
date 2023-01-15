@@ -1,11 +1,10 @@
-word2vec-768.txt
 result/
-model.bin
 bert.sh
 *.bin
 cache
 trained-models
 data/test.json
+!bert-GRU-final.bin
 
 # JetBrains PyCharm IDE
 .idea/

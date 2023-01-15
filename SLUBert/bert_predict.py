@@ -22,7 +22,7 @@ tokenizer = BertTokenizer.from_pretrained(pretrained_model_name)
 bert = BertModel.from_pretrained(pretrained_model_name)
 
 decoder = SimpleDecoder(768, label_converter.num_indexes).to(arguments.device)
-check_point = torch.load(open('trained-models/bert-GRU-final.bin', 'rb'), map_location=arguments.device)
+check_point = torch.load(open('bert-GRU-final.bin', 'rb'), map_location=arguments.device)
 decoder.load_state_dict(check_point['model'])
 
 for i in test_data:

@@ -1,19 +1,32 @@
-# CS3602-Group-Project
-The final project of CS3602(natural language processing---SJTU IEEE Honor Class).
+## 依赖环境
 
-## Environment Setup
-    conda create -n slu python=3.8
-    conda install pytorch torchvision torchaudio pytorch-cuda=11.6 -c pytorch -c nvidia
+```
+conda create -n nlp_course python=3.8
+conda install pytorch==1.12.1 torchvision==0.13.1 torchaudio==0.12.1 cudatoolkit==11.3 -c pytorch
+conda install transformers==4.25.1 -c huggingface
+conda activate nlp_course
+```
 
-## File Explanation
-- `SLUBase`: The pipeline for the baseline models
-- `SLUBaseHistory`: The pipeline for the baseline models with the usage of history conversations
-- `SLUBert`: The pipeline for our proposed model 'SLUBert' and 'SLUBert-MultiTurn' which leverages the history conversations
-- `utils/args.py`: definitions of all related optional parameters
-- `utils/initialization.py`: Initialize system settings, including setting random seed and GPU/CPU
-- `utils/vocab.py`: Build a vocabulary for encoding input and output
-- `utils/word2vec.py`: Load word vector
-- `utils/example.py`: Read data
-- `utils/batch.py`: Load input data as batches
-- `model/slu_baseline_tagging.py`: Baseline model
-- `scripts/slu_baseline.py`: Main program script
+在终端中运行上述命令即可。
+
+## 测试脚本运行方式
+
+```
+python3 SLUBert/bert_predict.py --device=cuda
+```
+
+这个脚本会读取`data/test_unlabelled.json`，将结果输出到`data/test.json`中。
+
+## 文件说明
+
+- SLUBase：基线模型目录。
+  - slu_baseline.py：训练脚本。
+- SLUBaseHistory：基线模型的变种，参见论文3.2节。
+  - slu_baseline_history.py：训练脚本。
+- SLUBert：我们的利用了Bert的模型。
+  - bert_test.py：SLUBert模型的训练脚本。
+  - bert_multi_turn_test.py：SLUBert-MultiTurn的训练脚本。
+  - bert_predict.py：填写测试集的脚本。
+- visual：可视化相关代码。
+- bert-GRU-final.bin：我们得到的效果最好的模型。
+
